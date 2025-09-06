@@ -1,4 +1,4 @@
-#EXTM3U    
+#EXTM3U x-tvg-url="https://fhux.short.gy/epg.xml.gz"   
 #EXTINF:-1 tvg-id="cnbctv18prime" tvg-logo="https://live.dinesh29.com.np/logos/jiotvplus/cnbctv18prime.png" group-title="Business News",CNBC TV18 Prime
 https://live.dinesh29.com.np/stream/jiotvplus/cnbctv18prime/master.m3u8
 
