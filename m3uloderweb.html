@@ -133,7 +133,7 @@ function renderGroups(){const g=document.getElementById("groups");g.innerHTML=""
 
 function isFav(u){return favorites.includes(u);}function toggleFav(u){if(isFav(u))favorites=favorites.filter(x=>x!==u);else favorites.push(u);localStorage.setItem("dvr_favs",JSON.stringify(favorites));renderChannels();}
 
-function playChannel(ch){if(!ch)return;document.getElementById("nowTitle").textContent=ch.title;document.getElementById("nowGroup").textContent=ch.group;document.getElementById("favBtn").textContent=isFav(ch.url)?"⭐":"❤️";
+function playChannel(ch){if(!ch)return;document.getElementById("nowTitle").textContent=ch.title;document.getElementById("nowGroup").textContent=ch.group;document.getElementById("favBtn").textContent=isFav(ch.url)?"★":"☆";
   const now=getNowNext(ch.id);document.getElementById("nowEPG").textContent=now?"Now: "+now.now+" | Next: "+now.next:"No EPG";
   player.src({src:ch.url,type:"application/x-mpegURL"});player.play();}
   
@@ -165,7 +165,7 @@ document.getElementById("fetchBtn").onclick=()=>{fetch(document.getElementById("
 document.getElementById("search").oninput=e=>{const q=e.target.value;const fav=document.getElementById("showFavs").classList.contains("active");const groupBtn=document.querySelector(".group-btn.active");const g=(groupBtn&&groupBtn.textContent!=="All")?groupBtn.textContent:null;renderChannels(g,fav,q);};
 document.getElementById("showAll").onclick=()=>{document.querySelectorAll(".group-btn").forEach(b=>b.classList.remove("active"));document.getElementById("showAll").classList.add("active");renderChannels();};
 document.getElementById("showFavs").onclick=()=>{document.querySelectorAll(".group-btn").forEach(b=>b.classList.remove("active"));document.getElementById("showFavs").classList.add("active");renderChannels(null,true);};
-document.getElementById("favBtn").onclick=()=>{const t=document.getElementById("nowTitle").textContent;const ch=channels.find(c=>c.title===t);if(ch){toggleFav(ch.url);document.getElementById("favBtn").textContent=isFav(ch.url)?"⭐":"❤️";}};
+document.getElementById("favBtn").onclick=()=>{const t=document.getElementById("nowTitle").textContent;const ch=channels.find(c=>c.title===t);if(ch){toggleFav(ch.url);document.getElementById("favBtn").textContent=isFav(ch.url)"★":"☆";}};
 
 // auto load
 window.onload=()=>{const url=document.getElementById("m3uUrl").value;fetch(url).then(r=>r.text()).then(parseM3U).catch(()=>{});};
@@ -173,6 +173,7 @@ window.onload=()=>{const url=document.getElementById("m3uUrl").value;fetch(url).
 </body>
 
 </html>
+
 
 
 
