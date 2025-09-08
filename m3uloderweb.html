@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>IPTV � DVR</title>
+  <title>IPTV — DVR</title>
 
   <!-- Video.js -->
   <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet" />
@@ -49,7 +49,7 @@
       <div class="mark">DVR</div>
       <div>
         <h1>DVR IPTV</h1>
-        <div style="font-size:12px;color:var(--muted)"></div>
+        <div style="font-size:12px;color:var(--muted)">📡</div>
       </div>
     </div>
     <div class="top-controls">
@@ -66,7 +66,7 @@
         <div class="now-playing">
           <div>
             <div id="nowTitle" style="font-weight:600">Nothing playing</div>
-            <div class="meta" id="nowGroup">�</div>
+            <div class="meta" id="nowGroup">___</div>
             <div class="epgline" id="nowEPG">No EPG</div>
           </div>
           <button id="favBtn" class="btn"></button>
@@ -79,7 +79,7 @@
           </div>
         </div>
       </div>
-      <div class="footer-note">M3U URL  </div>
+      <div class="footer-note">M3U URL లోడ్ చేయండి</div>
     </div>
 
     <div class="channels-card">
@@ -102,7 +102,7 @@
       </a>  
       <br>
       <span style="font-size:15px;color:var(--muted)">
-        � 2025 DVR IPTV ��All rights reserved
+        © 2025 DVR IPTV __📡__All rights reserved
       </span>
     </div>
 
@@ -143,7 +143,7 @@ function renderChannels(filter=null,onlyFav=false,q=""){const g=document.getElem
     el.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/52x36'}"><div style="flex:1"><div class="title">${ch.title}</div><div class="sub">${ch.group}</div><div class="epgline">${epg?("Now: "+epg.now):"No EPG"}</div></div><button class="btn">${isFav(ch.url)?"":""}</button>`;
     el.onclick=()=>playChannel(ch);el.querySelector("button").onclick=(e)=>{e.stopPropagation();toggleFav(ch.url);};g.appendChild(el);});}
 
-function getNowNext(id){if(!id||!epgData[id])return null;const now=new Date();const progs=epgData[id];let current=null,next=null;for(let i=0;i<progs.length;i++){let p=progs[i];if(now>=p.start&&now<p.stop){current=p;next=progs[i+1];break;}}return current?{now:current.title,next:next?next.title:"�"}:null;}
+function getNowNext(id){if(!id||!epgData[id])return null;const now=new Date();const progs=epgData[id];let current=null,next=null;for(let i=0;i<progs.length;i++){let p=progs[i];if(now>=p.start&&now<p.stop){current=p;next=progs[i+1];break;}}return current?{now:current.title,next:next?next.title:"—"}:null;}
 
 // --------- EPG Loading (supports .gz) ----------
 async function fetchEPG(url){
@@ -171,4 +171,5 @@ document.getElementById("favBtn").onclick=()=>{const t=document.getElementById("
 window.onload=()=>{const url=document.getElementById("m3uUrl").value;fetch(url).then(r=>r.text()).then(parseM3U).catch(()=>{});};
 </script>
 </body>
+
 </html>
