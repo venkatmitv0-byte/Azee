@@ -140,7 +140,7 @@ function playChannel(ch){if(!ch)return;document.getElementById("nowTitle").textC
 function renderChannels(filter=null,onlyFav=false,q=""){const g=document.getElementById("channelGrid");g.innerHTML="";let list=channels.slice();if(filter)list=list.filter(c=>c.group===filter);if(onlyFav)list=list.filter(c=>isFav(c.url));if(q)list=list.filter(c=>(c.title||"").toLowerCase().includes(q.toLowerCase()));
   if(list.length===0){g.innerHTML='<div class="sub">No channels</div>';return;}
   list.forEach(ch=>{let el=document.createElement("div");el.className="ch";let epg=getNowNext(ch.id);
-    el.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/52x36'}"><div style="flex:1"><div class="title">${ch.title}</div><div class="sub">${ch.group}</div><div class="epgline">${epg?("Now: "+epg.now):"No EPG"}</div></div><button class="btn">${isFav(ch.url)?"":""}</button>`;
+    el.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/52x36'}"><div style="flex:1"><div class="title">${ch.title}</div><div class="sub">${ch.group}</div><div class="epgline">${epg?("Now: "+epg.now):"No EPG"}</div></div><button class="btn">${isFav(ch.url)?"★":"☆"}</button>`;
     el.onclick=()=>playChannel(ch);el.querySelector("button").onclick=(e)=>{e.stopPropagation();toggleFav(ch.url);};g.appendChild(el);});}
 
 function getNowNext(id){if(!id||!epgData[id])return null;const now=new Date();const progs=epgData[id];let current=null,next=null;for(let i=0;i<progs.length;i++){let p=progs[i];if(now>=p.start&&now<p.stop){current=p;next=progs[i+1];break;}}return current?{now:current.title,next:next?next.title:"—"}:null;}
