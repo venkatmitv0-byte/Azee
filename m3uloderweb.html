@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="te">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IPTV — DVR</title>
+
+  <!-- Video.js -->
+  <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#070707;--card:#0f0f0f;--accent:#e11d24;--muted:#9a9a9a;--text:#e8e8e8;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,Arial;background:var(--bg);color:var(--text)}
+    .app{max-width:1100px;margin:18px auto;padding:12px}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo .mark{width:46px;height:46px;border-radius:8px;background:linear-gradient(180deg,var(--accent),#a10a12);display:flex;align-items:center;justify-content:center;font-weight:700;color:white}
+    h1{margin:0;font-size:18px}
+    .top-controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .search{background:transparent;border:1px solid #222;padding:8px 10px;border-radius:8px;color:var(--text);min-width:220px}
+    .btn{background:var(--card);border:1px solid #222;padding:6px 10px;border-radius:8px;color:var(--text);cursor:pointer;font-size:13px}
+    .btn.accent{background:linear-gradient(180deg,var(--accent),#a10a12);border:none;color:white}
+    .layout{display:grid;grid-template-columns:420px 1fr;gap:12px}
+    .player-card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+    .video-wrap{border-radius:8px;overflow:hidden}
+    .now-playing{margin-top:10px;padding:8px;border-radius:8px;background:linear-gradient(0deg,#0b0b0b,transparent);display:flex;justify-content:space-between;align-items:center}
+    .meta{font-size:13px;color:var(--muted)}
+    .channels-card{background:var(--card);padding:12px;border-radius:10px;min-height:600px;overflow:auto}
+    .groups{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .group-btn{padding:6px 10px;border-radius:999px;border:1px solid #222;background:transparent;color:var(--muted);cursor:pointer;font-size:13px}
+    .group-btn.active{background:var(--accent);color:white;border:none}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .ch{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px;background:#0b0b0b;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+    .ch img{width:52px;height:36px;object-fit:cover;border-radius:6px}
+    .title{font-size:14px}
+    .sub{font-size:12px;color:var(--muted)}
+    .epgline{font-size:11px;color:#ccc}
+    .footer-note{margin-top:14px;color:var(--muted);font-size:12px;text-align:center}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="mark">DVR</div>
+      <div>
+        <h1>DVR IPTV</h1>
+        <div style="font-size:12px;color:var(--muted)"></div>
+      </div>
+    </div>
+    <div class="top-controls">
+      <input id="search" class="search" placeholder="Search channels or groups..." />
+    </div>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="player-card">
+        <div class="video-wrap">
+          <video id="player" class="video-js vjs-big-play-centered" controls preload="auto" width="100%" height="300"></video>
+        </div>
+        <div class="now-playing">
+          <div>
+            <div id="nowTitle" style="font-weight:600">Nothing playing</div>
+            <div class="meta" id="nowGroup">—</div>
+            <div class="epgline" id="nowEPG">No EPG</div>
+          </div>
+          <button id="favBtn" class="btn"></button>
+        </div>
+        <div style="margin-top:10px">
+          <div class="small">M3U URL:</div>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <input id="m3uUrl" class="search" value="" />
+            <button id="fetchBtn" class="btn accent">Fetch</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">M3U URL  </div>
+    </div>
+
+    <div class="channels-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="font-weight:600">Groups</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button id="showAll" class="group-btn active">All</button>
+          <button id="showFavs" class="group-btn">Favorites</button>
+        </div>
+      </div>
+      <div id="groups" class="groups"></div>
+      <div id="channelGrid" class="grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+      <a href="https://t.me/DVRiptv" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:900">
+        @dvriptv
+      </a>  
+      <br>
+      <span style="font-size:15px;color:var(--muted)">
+        © 2025 DVR IPTV ——All rights reserved
+      </span>
+    </div>
+
+<script>
+const player = videojs('player',{fluid:true});
+let channels=[],groups=new Set(),favorites=JSON.parse(localStorage.getItem('dvr_favs')||'[]');
+let epgData={}; // tvg-id => [ {start,stop,title} ]
+
+function parseAttrs(s){const a={},r=/([a-zA-Z0-9\-_:]+)=(".*?"|'.*?'|[^ ]+)/g;let m;while((m=r.exec(s))!==null){let v=m[2];if(v.startsWith('"')||v.startsWith("'"))v=v.slice(1,-1);a[m[1]]=v;}return a;}
+
+function parseM3U(txt){
+  channels=[];groups=new Set();
+  const lines=txt.split(/\r?\n/).filter(l=>l.trim()!=="");
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i];
+    if(l.startsWith("#EXTINF:")){
+      const rest=l.substring(8).trim(),c=rest.lastIndexOf(","),attr=rest.substring(0,c),title=rest.substring(c+1).trim();
+      const at=parseAttrs(attr);let url=lines[i+1]||"",group=at["group-title"]||"Unknown",logo=at["tvg-logo"]||"",id=at["tvg-id"]||"";
+      channels.push({title,url,group,logo,id});groups.add(group);i++;
+    }
+  }
+  renderGroups();renderChannels();
+  // Fixed EPG URL (gz)
+  fetchEPG("https://fhux.short.gy/epg.xml.gz");
+}
+
+function renderGroups(){const g=document.getElementById("groups");g.innerHTML="";Array.from(groups).sort().forEach(x=>{let b=document.createElement("button");b.className="group-btn";b.textContent=x;b.onclick=()=>{document.querySelectorAll(".group-btn").forEach(bb=>bb.classList.remove("active"));b.classList.add("active");renderChannels(x)};g.appendChild(b);});}
+
+function isFav(u){return favorites.includes(u);}function toggleFav(u){if(isFav(u))favorites=favorites.filter(x=>x!==u);else favorites.push(u);localStorage.setItem("dvr_favs",JSON.stringify(favorites));renderChannels();}
+
+function playChannel(ch){if(!ch)return;document.getElementById("nowTitle").textContent=ch.title;document.getElementById("nowGroup").textContent=ch.group;document.getElementById("favBtn").textContent=isFav(ch.url)?"":"";
+  const now=getNowNext(ch.id);document.getElementById("nowEPG").textContent=now?"Now: "+now.now+" | Next: "+now.next:"No EPG";
+  player.src({src:ch.url,type:"application/x-mpegURL"});player.play();}
+  
+function renderChannels(filter=null,onlyFav=false,q=""){const g=document.getElementById("channelGrid");g.innerHTML="";let list=channels.slice();if(filter)list=list.filter(c=>c.group===filter);if(onlyFav)list=list.filter(c=>isFav(c.url));if(q)list=list.filter(c=>(c.title||"").toLowerCase().includes(q.toLowerCase()));
+  if(list.length===0){g.innerHTML='<div class="sub">No channels</div>';return;}
+  list.forEach(ch=>{let el=document.createElement("div");el.className="ch";let epg=getNowNext(ch.id);
+    el.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/52x36'}"><div style="flex:1"><div class="title">${ch.title}</div><div class="sub">${ch.group}</div><div class="epgline">${epg?("Now: "+epg.now):"No EPG"}</div></div><button class="btn">${isFav(ch.url)?"":""}</button>`;
+    el.onclick=()=>playChannel(ch);el.querySelector("button").onclick=(e)=>{e.stopPropagation();toggleFav(ch.url);};g.appendChild(el);});}
+
+function getNowNext(id){if(!id||!epgData[id])return null;const now=new Date();const progs=epgData[id];let current=null,next=null;for(let i=0;i<progs.length;i++){let p=progs[i];if(now>=p.start&&now<p.stop){current=p;next=progs[i+1];break;}}return current?{now:current.title,next:next?next.title:"—"}:null;}
+
+// --------- EPG Loading (supports .gz) ----------
+async function fetchEPG(url){
+  try{
+    const res=await fetch(url);
+    const buf=await res.arrayBuffer();
+    // decompress gz
+    const ds=new DecompressionStream("gzip");
+    const decompressed=new Response(new Blob([buf]).stream().pipeThrough(ds));
+    const xml=await decompressed.text();
+    parseEPG(xml);
+  }catch(e){console.error("EPG load fail",e);}
+}
+function parseEPG(xml){epgData={};const p=new DOMParser().parseFromString(xml,"text/xml");p.querySelectorAll("programme").forEach(pr=>{let cid=pr.getAttribute("channel");let start=parseDate(pr.getAttribute("start")),stop=parseDate(pr.getAttribute("stop")),title=pr.querySelector("title")?.textContent||"";if(!epgData[cid])epgData[cid]=[];epgData[cid].push({start,stop,title});});renderChannels();}
+function parseDate(s){let y=s.slice(0,4),m=s.slice(4,6),d=s.slice(6,8),h=s.slice(8,10),mi=s.slice(10,12),se=s.slice(12,14);return new Date(`${y}-${m}-${d}T${h}:${mi}:${se}`);}
+
+// events
+document.getElementById("fetchBtn").onclick=()=>{fetch(document.getElementById("m3uUrl").value).then(r=>r.text()).then(parseM3U).catch(e=>alert("M3U load fail:"+e));};
+document.getElementById("search").oninput=e=>{const q=e.target.value;const fav=document.getElementById("showFavs").classList.contains("active");const groupBtn=document.querySelector(".group-btn.active");const g=(groupBtn&&groupBtn.textContent!=="All")?groupBtn.textContent:null;renderChannels(g,fav,q);};
+document.getElementById("showAll").onclick=()=>{document.querySelectorAll(".group-btn").forEach(b=>b.classList.remove("active"));document.getElementById("showAll").classList.add("active");renderChannels();};
+document.getElementById("showFavs").onclick=()=>{document.querySelectorAll(".group-btn").forEach(b=>b.classList.remove("active"));document.getElementById("showFavs").classList.add("active");renderChannels(null,true);};
+document.getElementById("favBtn").onclick=()=>{const t=document.getElementById("nowTitle").textContent;const ch=channels.find(c=>c.title===t);if(ch){toggleFav(ch.url);document.getElementById("favBtn").textContent=isFav(ch.url)?"":"";}};
+
+// auto load
+window.onload=()=>{const url=document.getElementById("m3uUrl").value;fetch(url).then(r=>r.text()).then(parseM3U).catch(()=>{});};
+</script>
+</body>
+</html>
