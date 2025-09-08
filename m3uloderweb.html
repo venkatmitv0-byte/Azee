@@ -133,7 +133,7 @@ function renderGroups(){const g=document.getElementById("groups");g.innerHTML=""
 
 function isFav(u){return favorites.includes(u);}function toggleFav(u){if(isFav(u))favorites=favorites.filter(x=>x!==u);else favorites.push(u);localStorage.setItem("dvr_favs",JSON.stringify(favorites));renderChannels();}
 
-function playChannel(ch){if(!ch)return;document.getElementById("nowTitle").textContent=ch.title;document.getElementById("nowGroup").textContent=ch.group;document.getElementById("favBtn").textContent=isFav(ch.url)?"":"";
+function playChannel(ch){if(!ch)return;document.getElementById("nowTitle").textContent=ch.title;document.getElementById("nowGroup").textContent=ch.group;document.getElementById("favBtn").textContent=isFav(ch.url)?"⭐":"❤️";
   const now=getNowNext(ch.id);document.getElementById("nowEPG").textContent=now?"Now: "+now.now+" | Next: "+now.next:"No EPG";
   player.src({src:ch.url,type:"application/x-mpegURL"});player.play();}
   
@@ -173,5 +173,6 @@ window.onload=()=>{const url=document.getElementById("m3uUrl").value;fetch(url).
 </body>
 
 </html>
+
 
 
