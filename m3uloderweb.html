@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>IPTV — DVR</title>
+  <title>IPTV  DVR</title>
 
   <!-- Video.js -->
   <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet" />
@@ -66,10 +66,10 @@
         <div class="now-playing">
           <div>
             <div id="nowTitle" style="font-weight:600">Nothing playing</div>
-            <div class="meta" id="nowGroup">___</div>
+            <div class="meta" id="nowGroup">__</div>
             <div class="epgline" id="nowEPG">No EPG</div>
           </div>
-          <button id="favBtn" class="btn">⭐</button>
+          <button id="favBtn" class="btn"></button>
         </div>
         <div style="margin-top:10px">
           <div class="small">M3U URL:</div>
@@ -79,7 +79,7 @@
           </div>
         </div>
       </div>
-      <div class="footer-note">M3U URL లోడ్ చేయండి</div>
+      <div class="footer-note">LOAD M3U URL </div>
     </div>
 
     <div class="channels-card">
@@ -102,7 +102,7 @@
       </a>  
       <br>
       <span style="font-size:15px;color:var(--muted)">
-        © 2025 DVR IPTV __📡__All rights reserved
+        © 2025 DVR IPTV __📡__All rights reserved
       </span>
     </div>
 
@@ -165,16 +165,10 @@ document.getElementById("fetchBtn").onclick=()=>{fetch(document.getElementById("
 document.getElementById("search").oninput=e=>{const q=e.target.value;const fav=document.getElementById("showFavs").classList.contains("active");const groupBtn=document.querySelector(".group-btn.active");const g=(groupBtn&&groupBtn.textContent!=="All")?groupBtn.textContent:null;renderChannels(g,fav,q);};
 document.getElementById("showAll").onclick=()=>{document.querySelectorAll(".group-btn").forEach(b=>b.classList.remove("active"));document.getElementById("showAll").classList.add("active");renderChannels();};
 document.getElementById("showFavs").onclick=()=>{document.querySelectorAll(".group-btn").forEach(b=>b.classList.remove("active"));document.getElementById("showFavs").classList.add("active");renderChannels(null,true);};
-document.getElementById("favBtn").onclick=()=>{const t=document.getElementById("nowTitle").textContent;const ch=channels.find(c=>c.title===t);if(ch){toggleFav(ch.url);document.getElementById("favBtn").textContent=isFav(ch.url)"★":"☆";}};
+document.getElementById("favBtn").onclick=()=>{const t=document.getElementById("nowTitle").textContent;const ch=channels.find(c=>c.title===t);if(ch){toggleFav(ch.url);document.getElementById("favBtn").textContent=isFav(ch.url)?"★":"☆";}};
 
 // auto load
 window.onload=()=>{const url=document.getElementById("m3uUrl").value;fetch(url).then(r=>r.text()).then(parseM3U).catch(()=>{});};
 </script>
 </body>
-
 </html>
-
-
-
-
-
