@@ -13,7 +13,7 @@
     .search { flex: 1; text-align: right; }
     .search input { padding: 8px 12px; border-radius: 20px; border: none; font-size: 14px; outline: none; max-width: 200px; }
     .video-wrapper { position: sticky; top: 0; z-index: 999; background-color: #0a0a0a; }
-    .video-container { max-width: 900px; margin: auto; padding: 10px; }
+    .video-container { max-width: 900px; margin: auto; padding: 10px; text-align: center; position: relative; }
     video { width: 100%; height: auto; border-radius: 10px; }
     #epg { margin-top: 15px; color: #fff; font-size: 14px; background: #1a1a1a; padding: 10px; border-radius: 8px; display: none; }
     h2 { margin-left: 20px; color: #ff6666; font-size: 20px; border-left: 10px solid #cc0000; padding-left: 10px; }
@@ -24,6 +24,27 @@
     .channel img { width: 100%; border-radius: 15px; border: 1px solid #ffffff; }
     .channel-name { margin-top: 6px; font-size: 14px; }
     footer { text-align: center; padding: 20px; color: #bfbfbf; font-size: 14px; }
+
+    /* ⭐ Favourite floating icon */
+    #favIcon {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(204,0,0,0.9);
+      color: white;
+      border: none;
+      font-size: 20px;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s, transform 0.2s;
+    }
+    #favIcon:hover { background: #ff3333; transform: scale(1.1); }
+
     @media (max-width: 600px) {
       header { font-size: 20px; padding: 15px; }
       h2 { font-size: 18px; margin-left: 10px; padding-left: 8px; }
@@ -57,6 +78,7 @@
         }
       }'>
     </video>
+    <button id="favIcon">❤️</button>
     <div id="epg">
       <strong>Now Playing:</strong> <span id="nowTitle">Loading...</span><br>
       <strong>Next:</strong> <span id="nextTitle">Loading...</span>
@@ -72,8 +94,149 @@
 
 <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
 <script>
-<!-- code by https://www.html-code-generator.com -->
-document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%6C%61%79%65%72%20%3D%20%76%69%64%65%6F%6A%73%28%27%74%61%74%61%70%6C%61%79%65%72%27%29%3B%0A%20%20%63%6F%6E%73%74%20%6D%33%75%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B%0A%20%20%61%73%79%6E%63%20%66%75%6E%63%74%69%6F%6E%20%6C%6F%61%64%43%68%61%6E%6E%65%6C%73%28%29%20%7B%0A%20%20%20%20%63%6F%6E%73%74%20%72%65%73%20%3D%20%61%77%61%69%74%20%66%65%74%63%68%28%6D%33%75%55%72%6C%29%3B%0A%20%20%20%20%63%6F%6E%73%74%20%74%65%78%74%20%3D%20%61%77%61%69%74%20%72%65%73%2E%74%65%78%74%28%29%3B%0A%20%20%20%20%63%6F%6E%73%74%20%6C%69%6E%65%73%20%3D%20%74%65%78%74%2E%73%70%6C%69%74%28%22%5C%6E%22%29%3B%0A%20%20%20%20%6C%65%74%20%63%68%61%6E%6E%65%6C%73%20%3D%20%5B%5D%3B%0A%20%20%20%20%6C%65%74%20%63%75%72%72%65%6E%74%20%3D%20%7B%7D%3B%0A%20%20%20%20%6C%69%6E%65%73%2E%66%6F%72%45%61%63%68%28%6C%69%6E%65%20%3D%3E%20%7B%0A%20%20%20%20%20%20%6C%69%6E%65%20%3D%20%6C%69%6E%65%2E%74%72%69%6D%28%29%3B%0A%20%20%20%20%20%20%69%66%20%28%6C%69%6E%65%2E%73%74%61%72%74%73%57%69%74%68%28%22%23%45%58%54%49%4E%46%22%29%29%20%7B%0A%20%20%20%20%20%20%20%20%63%6F%6E%73%74%20%6E%61%6D%65%4D%61%74%63%68%20%3D%20%6C%69%6E%65%2E%6D%61%74%63%68%28%2F%2C%28%2E%2A%29%24%2F%29%3B%0A%20%20%20%20%20%20%20%20%63%6F%6E%73%74%20%6C%6F%67%6F%4D%61%74%63%68%20%3D%20%6C%69%6E%65%2E%6D%61%74%63%68%28%2F%74%76%67%2D%6C%6F%67%6F%3D%22%28%2E%2A%3F%29%22%2F%29%3B%0A%20%20%20%20%20%20%20%20%63%6F%6E%73%74%20%67%72%6F%75%70%4D%61%74%63%68%20%3D%20%6C%69%6E%65%2E%6D%61%74%63%68%28%2F%67%72%6F%75%70%2D%74%69%74%6C%65%3D%22%28%2E%2A%3F%29%22%2F%29%3B%0A%20%20%20%20%20%20%20%20%63%75%72%72%65%6E%74%20%3D%20%7B%0A%20%20%20%20%20%20%20%20%20%20%6E%61%6D%65%3A%20%6E%61%6D%65%4D%61%74%63%68%20%3F%20%6E%61%6D%65%4D%61%74%63%68%5B%31%5D%2E%74%72%69%6D%28%29%20%3A%20%22%55%6E%6B%6E%6F%77%6E%22%2C%0A%20%20%20%20%20%20%20%20%20%20%6C%6F%67%6F%3A%20%6C%6F%67%6F%4D%61%74%63%68%20%3F%20%6C%6F%67%6F%4D%61%74%63%68%5B%31%5D%20%3A%20%22%22%2C%0A%20%20%20%20%20%20%20%20%20%20%67%72%6F%75%70%3A%20%67%72%6F%75%70%4D%61%74%63%68%20%3F%20%67%72%6F%75%70%4D%61%74%63%68%5B%31%5D%20%3A%20%22%4F%74%68%65%72%73%22%0A%20%20%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%20%20%7D%20%65%6C%73%65%20%69%66%20%28%6C%69%6E%65%20%26%26%20%21%6C%69%6E%65%2E%73%74%61%72%74%73%57%69%74%68%28%22%23%22%29%29%20%7B%0A%20%20%20%20%20%20%20%20%63%75%72%72%65%6E%74%2E%75%72%6C%20%3D%20%6C%69%6E%65%3B%0A%20%20%20%20%20%20%20%20%63%68%61%6E%6E%65%6C%73%2E%70%75%73%68%28%63%75%72%72%65%6E%74%29%3B%0A%20%20%20%20%20%20%20%20%63%75%72%72%65%6E%74%20%3D%20%7B%7D%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%29%3B%0A%20%20%20%20%63%6F%6E%73%74%20%67%72%6F%75%70%73%20%3D%20%7B%7D%3B%0A%20%20%20%20%63%68%61%6E%6E%65%6C%73%2E%66%6F%72%45%61%63%68%28%63%68%20%3D%3E%20%7B%0A%20%20%20%20%20%20%69%66%20%28%21%67%72%6F%75%70%73%5B%63%68%2E%67%72%6F%75%70%5D%29%20%67%72%6F%75%70%73%5B%63%68%2E%67%72%6F%75%70%5D%20%3D%20%5B%5D%3B%0A%20%20%20%20%20%20%67%72%6F%75%70%73%5B%63%68%2E%67%72%6F%75%70%5D%2E%70%75%73%68%28%63%68%29%3B%0A%20%20%20%20%7D%29%3B%0A%20%20%20%20%63%6F%6E%73%74%20%63%6F%6E%74%61%69%6E%65%72%20%3D%20%64%6F%63%75%6D%65%6E%74%2E%67%65%74%45%6C%65%6D%65%6E%74%42%79%49%64%28%22%63%68%61%6E%6E%65%6C%2D%63%6F%6E%74%61%69%6E%65%72%22%29%3B%0A%20%20%20%20%63%6F%6E%74%61%69%6E%65%72%2E%69%6E%6E%65%72%48%54%4D%4C%20%3D%20%22%22%3B%0A%20%20%20%20%4F%62%6A%65%63%74%2E%6B%65%79%73%28%67%72%6F%75%70%73%29%2E%66%6F%72%45%61%63%68%28%67%72%6F%75%70%20%3D%3E%20%7B%0A%20%20%20%20%20%20%63%6F%6E%73%74%20%67%72%6F%75%70%44%69%76%20%3D%20%64%6F%63%75%6D%65%6E%74%2E%63%72%65%61%74%65%45%6C%65%6D%65%6E%74%28%22%64%69%76%22%29%3B%0A%20%20%20%20%20%20%67%72%6F%75%70%44%69%76%2E%63%6C%61%73%73%4E%61%6D%65%20%3D%20%22%63%68%61%6E%6E%65%6C%2D%67%72%6F%75%70%22%3B%0A%20%20%20%20%20%20%67%72%6F%75%70%44%69%76%2E%69%6E%6E%65%72%48%54%4D%4C%20%3D%20%60%3C%68%32%3E%24%7B%67%72%6F%75%70%7D%3C%2F%68%32%3E%60%3B%0A%20%20%20%20%20%20%63%6F%6E%73%74%20%6C%69%73%74%44%69%76%20%3D%20%64%6F%63%75%6D%65%6E%74%2E%63%72%65%61%74%65%45%6C%65%6D%65%6E%74%28%22%64%69%76%22%29%3B%0A%20%20%20%20%20%20%6C%69%73%74%44%69%76%2E%63%6C%61%73%73%4E%61%6D%65%20%3D%20%22%63%68%61%6E%6E%65%6C%2D%6C%69%73%74%22%3B%0A%20%20%20%20%20%20%67%72%6F%75%70%73%5B%67%72%6F%75%70%5D%2E%66%6F%72%45%61%63%68%28%63%68%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20%63%6F%6E%73%74%20%69%74%65%6D%20%3D%20%64%6F%63%75%6D%65%6E%74%2E%63%72%65%61%74%65%45%6C%65%6D%65%6E%74%28%22%64%69%76%22%29%3B%0A%20%20%20%20%20%20%20%20%69%74%65%6D%2E%63%6C%61%73%73%4E%61%6D%65%20%3D%20%22%63%68%61%6E%6E%65%6C%22%3B%0A%20%20%20%20%20%20%20%20%69%74%65%6D%2E%6F%6E%63%6C%69%63%6B%20%3D%20%28%29%20%3D%3E%20%63%68%61%6E%67%65%43%68%61%6E%6E%65%6C%28%63%68%2E%75%72%6C%2C%20%69%74%65%6D%29%3B%0A%20%20%20%20%20%20%20%20%69%74%65%6D%2E%69%6E%6E%65%72%48%54%4D%4C%20%3D%20%60%0A%20%20%20%20%20%20%20%20%20%20%3C%69%6D%67%20%73%72%63%3D%22%24%7B%63%68%2E%6C%6F%67%6F%20%7C%7C%20%22%68%74%74%70%73%3A%2F%2F%76%69%61%2E%70%6C%61%63%65%68%6F%6C%64%65%72%2E%63%6F%6D%2F%31%30%30%22%7D%22%20%61%6C%74%3D%22%24%7B%63%68%2E%6E%61%6D%65%7D%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3C%64%69%76%20%63%6C%61%73%73%3D%22%63%68%61%6E%6E%65%6C%2D%6E%61%6D%65%22%3E%24%7B%63%68%2E%6E%61%6D%65%7D%3C%2F%64%69%76%3E%0A%20%20%20%20%20%20%20%20%60%3B%0A%20%20%20%20%20%20%20%20%6C%69%73%74%44%69%76%2E%61%70%70%65%6E%64%43%68%69%6C%64%28%69%74%65%6D%29%3B%0A%20%20%20%20%20%20%7D%29%3B%0A%20%20%20%20%20%20%67%72%6F%75%70%44%69%76%2E%61%70%70%65%6E%64%43%68%69%6C%64%28%6C%69%73%74%44%69%76%29%3B%0A%20%20%20%20%20%20%63%6F%6E%74%61%69%6E%65%72%2E%61%70%70%65%6E%64%43%68%69%6C%64%28%67%72%6F%75%70%44%69%76%29%3B%0A%20%20%20%20%7D%29%3B%0A%20%20%20%20%64%6F%63%75%6D%65%6E%74%2E%71%75%65%72%79%53%65%6C%65%63%74%6F%72%28%22%2E%63%68%61%6E%6E%65%6C%22%29%3F%2E%63%6C%69%63%6B%28%29%3B%0A%20%20%7D%0A%20%20%66%75%6E%63%74%69%6F%6E%20%63%68%61%6E%67%65%43%68%61%6E%6E%65%6C%28%75%72%6C%2C%20%65%6C%65%6D%65%6E%74%29%20%7B%0A%20%20%20%20%70%6C%61%79%65%72%2E%70%61%75%73%65%28%29%3B%0A%20%20%20%20%70%6C%61%79%65%72%2E%72%65%73%65%74%28%29%3B%0A%20%20%20%20%70%6C%61%79%65%72%2E%73%72%63%28%7B%20%73%72%63%3A%20%75%72%6C%2C%20%74%79%70%65%3A%20%27%61%70%70%6C%69%63%61%74%69%6F%6E%2F%78%2D%6D%70%65%67%55%52%4C%27%20%7D%29%3B%0A%20%20%20%20%70%6C%61%79%65%72%2E%70%6C%61%79%28%29%3B%0A%20%20%20%20%2F%2F%20%54%65%6C%75%67%75%20%64%65%66%61%75%6C%74%20%6C%61%6E%67%75%61%67%65%20%73%65%6C%65%63%74%69%6F%6E%0A%20%20%20%20%70%6C%61%79%65%72%2E%6F%6E%65%28%27%6C%6F%61%64%65%64%6D%65%74%61%64%61%74%61%27%2C%20%28%29%20%3D%3E%20%7B%0A%20%20%20%20%20%20%63%6F%6E%73%74%20%74%72%61%63%6B%73%20%3D%20%70%6C%61%79%65%72%2E%61%75%64%69%6F%54%72%61%63%6B%73%28%29%3B%0A%20%20%20%20%20%20%69%66%20%28%74%72%61%63%6B%73%20%26%26%20%74%72%61%63%6B%73%2E%6C%65%6E%67%74%68%29%20%7B%0A%20%20%20%20%20%20%20%20%66%6F%72%20%28%6C%65%74%20%69%20%3D%20%30%3B%20%69%20%3C%20%74%72%61%63%6B%73%2E%6C%65%6E%67%74%68%3B%20%69%2B%2B%29%20%7B%0A%20%20%20%20%20%20%20%20%20%20%63%6F%6E%73%74%20%6C%61%6E%67%20%3D%20%28%74%72%61%63%6B%73%5B%69%5D%2E%6C%61%6E%67%75%61%67%65%20%7C%7C%20%22%22%29%2E%74%6F%4C%6F%77%65%72%43%61%73%65%28%29%3B%0A%20%20%20%20%20%20%20%20%20%20%69%66%20%28%6C%61%6E%67%20%3D%3D%3D%20%22%74%65%22%20%7C%7C%20%6C%61%6E%67%20%3D%3D%3D%20%22%74%65%6C%22%20%7C%7C%20%6C%61%6E%67%20%3D%3D%3D%20%22%74%65%6C%75%67%75%22%29%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%74%72%61%63%6B%73%5B%69%5D%2E%65%6E%61%62%6C%65%64%20%3D%20%74%72%75%65%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%20%65%6C%73%65%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%74%72%61%63%6B%73%5B%69%5D%2E%65%6E%61%62%6C%65%64%20%3D%20%66%61%6C%73%65%3B%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%29%3B%0A%20%20%20%20%64%6F%63%75%6D%65%6E%74%2E%71%75%65%72%79%53%65%6C%65%63%74%6F%72%41%6C%6C%28%27%2E%63%68%61%6E%6E%65%6C%27%29%2E%66%6F%72%45%61%63%68%28%65%6C%20%3D%3E%20%65%6C%2E%63%6C%61%73%73%4C%69%73%74%2E%72%65%6D%6F%76%65%28%27%61%63%74%69%76%65%2D%63%68%61%6E%6E%65%6C%27%29%29%3B%0A%20%20%20%20%65%6C%65%6D%65%6E%74%2E%63%6C%61%73%73%4C%69%73%74%2E%61%64%64%28%27%61%63%74%69%76%65%2D%63%68%61%6E%6E%65%6C%27%29%3B%0A%20%20%20%20%64%6F%63%75%6D%65%6E%74%2E%67%65%74%45%6C%65%6D%65%6E%74%42%79%49%64%28%22%65%70%67%22%29%2E%73%74%79%6C%65%2E%64%69%73%70%6C%61%79%20%3D%20%22%62%6C%6F%63%6B%22%3B%0A%20%20%20%20%64%6F%63%75%6D%65%6E%74%2E%67%65%74%45%6C%65%6D%65%6E%74%42%79%49%64%28%22%6E%6F%77%54%69%74%6C%65%22%29%2E%69%6E%6E%65%72%54%65%78%74%20%3D%20%65%6C%65%6D%65%6E%74%2E%71%75%65%72%79%53%65%6C%65%63%74%6F%72%28%22%2E%63%68%61%6E%6E%65%6C%2D%6E%61%6D%65%22%29%2E%69%6E%6E%65%72%54%65%78%74%3B%0A%20%20%20%20%64%6F%63%75%6D%65%6E%74%2E%67%65%74%45%6C%65%6D%65%6E%74%42%79%49%64%28%22%6E%65%78%74%54%69%74%6C%65%22%29%2E%69%6E%6E%65%72%54%65%78%74%20%3D%20%22%43%6F%6D%69%6E%67%20%75%70%20%73%6F%6F%6E%2E%2E%2E%22%3B%0A%20%20%7D%0A%20%20%64%6F%63%75%6D%65%6E%74%2E%67%65%74%45%6C%65%6D%65%6E%74%42%79%49%64%28%22%63%68%61%6E%6E%65%6C%53%65%61%72%63%68%22%29%2E%61%64%64%45%76%65%6E%74%4C%69%73%74%65%6E%65%72%28%22%69%6E%70%75%74%22%2C%20%66%75%6E%63%74%69%6F%6E%20%28%29%20%7B%0A%20%20%20%20%63%6F%6E%73%74%20%74%65%72%6D%20%3D%20%74%68%69%73%2E%76%61%6C%75%65%2E%74%6F%4C%6F%77%65%72%43%61%73%65%28%29%3B%0A%20%20%20%20%64%6F%63%75%6D%65%6E%74%2E%71%75%65%72%79%53%65%6C%65%63%74%6F%72%41%6C%6C%28%22%2E%63%68%61%6E%6E%65%6C%22%29%2E%66%6F%72%45%61%63%68%28%63%68%61%6E%6E%65%6C%20%3D%3E%20%7B%0A%20%20%20%20%20%20%63%6F%6E%73%74%20%6E%61%6D%65%20%3D%20%63%68%61%6E%6E%65%6C%2E%71%75%65%72%79%53%65%6C%65%63%74%6F%72%28%22%2E%63%68%61%6E%6E%65%6C%2D%6E%61%6D%65%22%29%2E%69%6E%6E%65%72%54%65%78%74%2E%74%6F%4C%6F%77%65%72%43%61%73%65%28%29%3B%0A%20%20%20%20%20%20%63%68%61%6E%6E%65%6C%2E%73%74%79%6C%65%2E%64%69%73%70%6C%61%79%20%3D%20%6E%61%6D%65%2E%69%6E%63%6C%75%64%65%73%28%74%65%72%6D%29%20%3F%20%22%62%6C%6F%63%6B%22%20%3A%20%22%6E%6F%6E%65%22%3B%0A%20%20%20%20%7D%29%3B%0A%20%20%7D%29%3B%0A%20%20%6C%6F%61%64%43%68%61%6E%6E%65%6C%73%28%29%3B%0A%3C%2F%73%63%72%69%70%74%3E'));
+document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%6C%61%79%65%72%20%3D%20%76%69%64%65%6F%6A%73%28%27%74%61%74%61%70%6C%61%79%65%72%27%29%3B%0A%20%20%63%6F%6E%73%74%20%6D%33%75%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B%0A%20%20%6C%65%74%20%61%6C%6C%43%68%61%6E%6E%65%6C%73%20%3D%20%5B%5D%3B%0A%20%20%6C%65%74%20%63%75%72%72%65%6E%74%43%68%61%6E%6E%65%6C%20%3D%20%6E%75%6C%6C%3B%0A'));
+</script>
+
+
+  async function loadChannels() {
+    const res = await fetch(m3uUrl);
+    const text = await res.text();
+    const lines = text.split("\n");
+
+    let current = {};
+    lines.forEach(line => {
+      line = line.trim();
+      if (line.startsWith("#EXTINF")) {
+        const nameMatch = line.match(/,(.*)$/);
+        const logoMatch = line.match(/tvg-logo="(.*?)"/);
+        const groupMatch = line.match(/group-title="(.*?)"/);
+        current = {
+          name: nameMatch ? nameMatch[1].trim() : "Unknown",
+          logo: logoMatch ? logoMatch[1] : "",
+          group: groupMatch ? groupMatch[1] : "Others"
+        };
+      } else if (line && !line.startsWith("#")) {
+        current.url = line;
+        allChannels.push(current);
+        current = {};
+      }
+    });
+
+    renderChannels();
+  }
+
+  function renderChannels() {
+    const container = document.getElementById("channel-container");
+    container.innerHTML = "";
+
+    // ⭐ Favourites first
+    const favs = getFavourites();
+    if (favs.length > 0) {
+      const favDiv = document.createElement("div");
+      favDiv.className = "channel-group";
+      favDiv.innerHTML = `<h2>⭐ Favourites</h2>`;
+      const favList = document.createElement("div");
+      favList.className = "channel-list";
+      favs.forEach(ch => {
+        favList.appendChild(createChannelItem(ch));
+      });
+      favDiv.appendChild(favList);
+      container.appendChild(favDiv);
+    }
+
+    // Other groups
+    const groups = {};
+    allChannels.forEach(ch => {
+      if (!groups[ch.group]) groups[ch.group] = [];
+      groups[ch.group].push(ch);
+    });
+
+    Object.keys(groups).forEach(group => {
+      const groupDiv = document.createElement("div");
+      groupDiv.className = "channel-group";
+      groupDiv.innerHTML = `<h2>${group}</h2>`;
+      const listDiv = document.createElement("div");
+      listDiv.className = "channel-list";
+      groups[group].forEach(ch => {
+        listDiv.appendChild(createChannelItem(ch));
+      });
+      groupDiv.appendChild(listDiv);
+      container.appendChild(groupDiv);
+    });
+
+    document.querySelector(".channel")?.click();
+  }
+
+  function createChannelItem(ch) {
+    const item = document.createElement("div");
+    item.className = "channel";
+    item.innerHTML = `
+      <img src="${ch.logo || "https://via.placeholder.com/100"}" alt="${ch.name}">
+      <div class="channel-name">${ch.name}</div>
+    `;
+    item.onclick = () => changeChannel(ch, item);
+    return item;
+  }
+
+  function changeChannel(ch, element) {
+    currentChannel = ch;
+    player.pause();
+    player.reset();
+    player.src({ src: ch.url, type: 'application/x-mpegURL' });
+    player.play();
+
+    document.querySelectorAll('.channel').forEach(el => el.classList.remove('active-channel'));
+    element.classList.add('active-channel');
+
+    document.getElementById("epg").style.display = "block";
+    document.getElementById("nowTitle").innerText = ch.name;
+    document.getElementById("nextTitle").innerText = "Coming up soon...";
+
+    updateFavButton();
+  }
+
+  // ⭐ Favourites handling
+  function getFavourites() {
+    return JSON.parse(localStorage.getItem("favourites") || "[]");
+  }
+
+  function saveFavourites(favs) {
+    localStorage.setItem("favourites", JSON.stringify(favs));
+  }
+
+  function toggleFavourite() {
+    if (!currentChannel) return;
+    let favs = getFavourites();
+    const exists = favs.find(ch => ch.url === currentChannel.url);
+    if (exists) {
+      favs = favs.filter(ch => ch.url !== currentChannel.url);
+    } else {
+      favs.push(currentChannel);
+    }
+    saveFavourites(favs);
+    renderChannels();
+    updateFavButton();
+  }
+
+  function updateFavButton() {
+    if (!currentChannel) return;
+    const favs = getFavourites();
+    const isFav = favs.some(ch => ch.url === currentChannel.url);
+    document.getElementById("favIcon").innerText = isFav ? "💔" : "❤️";
+  }
+
+  document.getElementById("favIcon").addEventListener("click", toggleFavourite);
+
+  // search
+  document.getElementById("channelSearch").addEventListener("input", function () {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll(".channel").forEach(channel => {
+      const name = channel.querySelector(".channel-name").innerText.toLowerCase();
+      channel.style.display = name.includes(term) ? "block" : "none";
+    });
+  });
+
+  loadChannels();
 </script>
 </body>
 </html>
