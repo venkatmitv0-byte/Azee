@@ -1,252 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DVR iPTV</title>
-  <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet"/>
-  <style>
-    body { background-color: #0a0a0a; color: white; font-family: "Segoe UI", sans-serif; margin: 0; padding: 0; }
-    header { background-color: #330000; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 5px;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-    .logo { flex: 1; text-align: left; }
-    .search { flex: 1; text-align: right; }
-    .search input { padding: 8px 12px; border-radius: 20px; border: none; font-size: 14px; outline: none; max-width: 200px; }
-    .video-wrapper { position: sticky; top: 0; z-index: 999; background-color: #0a0a0a; }
-    .video-container { max-width: 900px; margin: auto; padding: 10px; }
-    video { width: 100%; height: auto; border-radius: 10px; }
-    #epg { margin-top: 15px; color: #fff; font-size: 14px; background: #1a1a1a; padding: 10px; border-radius: 8px; display: none; }
-    h2 { margin-left: 20px; color: #ff6666; font-size: 20px; border-left: 10px solid #cc0000; padding-left: 10px; }
-    .channel-group { margin-bottom: 20px; }
-    .channel-list { display: flex; flex-wrap: wrap; gap: 15px; padding: 1px 10px; }
-    .channel { width: 80px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; position: relative; }
-    .channel:hover, .channel.active-channel { transform: scale(1.08); box-shadow: 0 0 10px #ff0000; border: 2px solid #ffffff; }
-    .channel img { width: 100%; border-radius: 15px; border: 1px solid #ffffff; }
-    .channel-name { margin-top: 6px; font-size: 14px; }
-    .fav-btn { position: absolute; top: 5px; right: 5px; font-size: 18px; color: gold; cursor: pointer; text-shadow: 0 0 3px black; }
-    .fav-btn.inactive { color: gray; }
-
-    /* Ad overlay */
-    #adOverlay {
-      display: none;
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 2000;
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column;
-      color: white;
-    }
-    #adImage {
-      max-width: 90%; max-height: 80vh; border-radius: 10px;
-    }
-    #skipAd {
-      margin-top: 15px;
-      background: #ff0000; color: #fff; padding: 8px 12px; border: none;
-      border-radius: 5px; cursor: pointer; font-size: 14px;
-    }
-
-    footer { text-align: center; padding: 20px; color: #bfbfbf; font-size: 14px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DVR iPTV</title>
+<style>
+  body { background-color: #0a0a0a; color: white; font-family: "Segoe UI", sans-serif; margin: 0; padding: 0; }
+  header { background-color: #330000; padding: 20px; font-size: 20px; font-weight: bold; letter-spacing: 5px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  .logo { flex: 1; text-align: left; }
+  .search { flex: 1; text-align: right; }
+  .search input { padding: 8px 12px; border-radius: 20px; border: none; font-size: 14px; outline: none; max-width: 200px; }
+  .video-wrapper { position: sticky; top: 0; z-index: 999; background-color: #0a0a0a; }
+  .video-container { max-width: 900px; margin: auto; padding: 10px; position: relative; }
+  #player { width: 100%; height: 500px; border-radius: 10px; overflow: hidden; background:#000; }
+  #epg { margin-top: 15px; color: #fff; font-size: 15px; background: #330000; padding: 10px; border-radius: 100px; display: none; }
+  #playOverlay {
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center;
+    color:white; font-size:30px; cursor:pointer; z-index:10; border-radius:10px;
+  }
+  h2 { margin-left: 20px; color: #ff6666; font-size: 20px; border-left: 10px solid #cc0000; padding-left: 10px; }
+  .channel-group { margin-bottom: 20px; }
+  .channel-list { display: flex; flex-wrap: wrap; gap: 15px; padding: 1px 10px; }
+  .channel { width: 100px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; position: relative; }
+  .channel:hover, .channel.active-channel { transform: scale(1.08); box-shadow: 0 0 10px #ff0000; border: 2px solid #ffffff; }
+  .channel img { width: 100%; border-radius: 15px; border: 1px solid #ffffff; }
+  .channel-name { margin-top: 6px; font-size: 14px; }
+  .fav-btn { position: absolute; top:5px; right:5px; background: rgba(0,0,0,0.6); border:none; border-radius:50%; color:#fff; cursor:pointer; font-size:14px; padding:4px 6px; }
+  .fav-btn.active { background: gold; color: black; }
+  footer { text-align: center; padding: 20px; color: #bfbfbf; font-size: 14px; }
+  @media (max-width: 600px) {
+    header { font-size: 20px; padding: 15px; }
+    h2 { font-size: 18px; margin-left: 10px; padding-left: 8px; }
+    .channel { width: 80px; }
+    .channel-name { font-size: 11px; }
+    .video-container { padding: 5px; }
+    footer { font-size: 12px; padding: 15px; }
+    #player { height: 250px; }
+  }
+</style>
 </head>
 <body>
 
 <header>
   <div class="logo">DVR <span style="color:#ff4d4d;">iPTV</span></div>
-  <div class="search">
-    <input type="text" id="channelSearch" placeholder="🔎 Search Channels..." />
-  </div>
+  <div class="search"><input type="text" id="channelSearch" placeholder="🔎 Search Channels..." /></div>
 </header>
 
 <div class="video-wrapper">
   <div class="video-container">
-    <video id="tataplayer" class="video-js vjs-default-skin" controls preload="auto"
-      controlsList="nodownload"
-      data-setup='{
-        "techOrder": ["html5"],
-        "fluid": true,
-        "controlBar": {
-          "volumePanel": true,
-          "audioTrackButton": true,
-          "subsCapsButton": true
-        }
-      }'>
-    </video>
-    <div id="epg">
-      <strong>Now Playing:</strong> <span id="nowTitle">Loading...</span><br>
-      <strong>Next:</strong> <span id="nextTitle">Loading...</span>
-    </div>
+    <div id="player"></div>
+    <div id="playOverlay">▶️ Play</div>
+    <div id="epg"><strong>NOW Playing:</strong> <span id="nowTitle">Loading...</span><br>
+    <strong>NEXT:</strong> <span id="nextTitle">Coming soon...</span></div>
   </div>
 </div>
 
-<!-- Ad overlay -->
-<div id="adOverlay">
-  <img id="adImage" src="https://iili.io/KIuaqWN.png" alt="Ad">
-  <button id="skipAd">Skip (5)</button>
+<div id="favourites" class="channel-group" style="display:none;">
+  <h2>⭐ My Favourites</h2>
+  <div class="channel-list" id="favList"></div>
 </div>
 
 <div id="channel-container"></div>
 
-<footer>
-  © 2025 DVR iPTV — FOR EDUCATIONAL PURPOSES ONLY
-</footer>
+<footer>© 2025 DVR iPTV — FOR EDUCATIONAL PURPOSES ONLY</footer>
 
-<script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+<script src="https://venkatmitv0-byte.github.io/Azee/playerjs.js"></script>
 <script>
-document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%6C%61%79%65%72%20%3D%20%76%69%64%65%6F%6A%73%28%27%74%61%74%61%70%6C%61%79%65%72%27%29%3B%0A%20%20%63%6F%6E%73%74%20%6D%33%75%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B%0A'));
+document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%6C%65%74%20%70%6C%61%79%65%72%3B%0A%63%6F%6E%73%74%20%61%64%55%72%6C%3D%22%68%74%74%70%73%3A%2F%2F%76%65%6E%6B%61%74%6D%69%74%76%30%2D%62%79%74%65%2E%67%69%74%68%75%62%2E%69%6F%2F%41%7A%65%65%2F%56%69%76%61%43%75%74%5F%76%69%64%65%6F%5F%31%37%35%37%35%37%38%33%36%30%33%34%39%5F%31%30%38%30%48%44%2E%6D%70%34%22%3B%0A%63%6F%6E%73%74%20%6D%33%75%55%72%6C%3D%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B'));
 </script>
-  
-  
-  let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  let pendingChannel = null;
-  let adTimer = null;
-  let countdown = 5;
 
-  async function loadChannels() {
-    const res = await fetch(m3uUrl);
-    const text = await res.text();
+let lastChannelUrl="";
+let favChannels=[];
+let isStarted=false;
 
-    const lines = text.split("\n");
-    let channels = [];
-    let current = {};
+function initPlayer(url){ if(player) player.api("destroy"); player=new Playerjs({id:"player", file:url, autoplay:true, mute:false}); }
 
-    lines.forEach(line => {
-      line = line.trim();
-      if (line.startsWith("#EXTINF")) {
-        const nameMatch = line.match(/,(.*)$/);
-        const logoMatch = line.match(/tvg-logo="(.*?)"/);
-        const groupMatch = line.match(/group-title="(.*?)"/);
-
-        current = {
-          name: nameMatch ? nameMatch[1].trim() : "Unknown",
-          logo: logoMatch ? logoMatch[1] : "",
-          group: groupMatch ? groupMatch[1] : "Others"
-        };
-      } else if (line && !line.startsWith("#")) {
-        current.url = line;
-        channels.push(current);
-        current = {};
-      }
-    });
-
-    const groups = { "⭐ Favorites": [] };
-    channels.forEach(ch => {
-      if (favs.some(f => f.url === ch.url)) groups["⭐ Favorites"].push(ch);
-      if (!groups[ch.group]) groups[ch.group] = [];
-      groups[ch.group].push(ch);
-    });
-
-    const container = document.getElementById("channel-container");
-    container.innerHTML = "";
-
-    Object.keys(groups).forEach(group => {
-      if (!groups[group].length) return;
-      const groupDiv = document.createElement("div");
-      groupDiv.className = "channel-group";
-      groupDiv.innerHTML = `<h2>${group}</h2>`;
-
-      const listDiv = document.createElement("div");
-      listDiv.className = "channel-list";
-
-      groups[group].forEach(ch => {
-        const item = document.createElement("div");
-        item.className = "channel";
-
-        const isFav = favs.some(f => f.url === ch.url);
-        item.innerHTML = `
-          <span class="fav-btn ${isFav ? '' : 'inactive'}" title="Toggle Favorite">★</span>
-          <img src="${ch.logo || "https://via.placeholder.com/100"}" alt="${ch.name}">
-          <div class="channel-name">${ch.name}</div>
-        `;
-
-        item.querySelector(".fav-btn").onclick = (e) => {
-          e.stopPropagation();
-          toggleFavorite(ch, item.querySelector(".fav-btn"));
-        };
-
-        item.onclick = () => showAdFirst(ch, item);
-
-        listDiv.appendChild(item);
-      });
-
-      groupDiv.appendChild(listDiv);
-      container.appendChild(groupDiv);
-    });
-
-    document.querySelector(".channel")?.click();
-  }
-
-  function toggleFavorite(ch, btn) {
-    const exists = favs.some(f => f.url === ch.url);
-    if (exists) {
-      favs = favs.filter(f => f.url !== ch.url);
-      btn.classList.add("inactive");
-    } else {
-      favs.push(ch);
-      btn.classList.remove("inactive");
-    }
-    localStorage.setItem("favorites", JSON.stringify(favs));
-    loadChannels();
-  }
-
-  function showAdFirst(ch, element) {
-    pendingChannel = { ch, element };
-    document.getElementById("adOverlay").style.display = "flex";
-    countdown = 5;
-    document.getElementById("skipAd").innerText = "Skip (" + countdown + ")";
-    adTimer = setInterval(() => {
-      countdown--;
-      document.getElementById("skipAd").innerText = "Skip (" + countdown + ")";
-      if (countdown <= 0) {
-        clearInterval(adTimer);
-        playChannelAfterAd();
-      }
-    }, 1000);
-  }
-
-  function playChannelAfterAd() {
-    clearInterval(adTimer);
-    if (!pendingChannel) return;
-    const { ch, element } = pendingChannel;
-    document.getElementById("adOverlay").style.display = "none";
-    changeChannel(ch.url, element);
-    pendingChannel = null;
-  }
-
-  document.getElementById("skipAd").onclick = playChannelAfterAd;
-
-  function changeChannel(url, element) {
-    player.pause();
-    player.reset();
-    player.src({ src: url, type: 'application/x-mpegURL' });
-    player.play();
-
-    player.one('loadedmetadata', () => {
-      const tracks = player.audioTracks();
-      if (tracks && tracks.length) {
-        for (let i = 0; i < tracks.length; i++) {
-          const lang = (tracks[i].language || "").toLowerCase();
-          tracks[i].enabled = (lang === "te" || lang === "tel" || lang === "telugu");
-        }
-      }
-    });
-
-    document.querySelectorAll('.channel').forEach(el => el.classList.remove('active-channel'));
-    element.classList.add('active-channel');
-
-    document.getElementById("epg").style.display = "block";
-    document.getElementById("nowTitle").innerText = element.querySelector(".channel-name").innerText;
-    document.getElementById("nextTitle").innerText = "Coming up soon...";
-  }
-
-  document.getElementById("channelSearch").addEventListener("input", function () {
-    const term = this.value.toLowerCase();
-    document.querySelectorAll(".channel").forEach(channel => {
-      const name = channel.querySelector(".channel-name").innerText.toLowerCase();
-      channel.style.display = name.includes(term) ? "block" : "none";
-    });
+async function loadChannels(){
+  const res = await fetch(m3uUrl);
+  const text = await res.text();
+  const lines=text.split("\n");
+  let channels=[], current={};
+  lines.forEach(line=>{
+    line=line.trim();
+    if(line.startsWith("#EXTINF")){
+      const name=line.match(/,(.*)$/), logo=line.match(/tvg-logo="(.*?)"/), group=line.match(/group-title="(.*?)"/);
+      current={ name:name?name[1].trim():"Unknown", logo:logo?logo[1]:"", group:group?group[1]:"Others"};
+    } else if(line && !line.startsWith("#")){current.url=line; channels.push(current); current={}; }
   });
 
-  loadChannels();
+  const groups={};
+  channels.forEach(ch=>{ if(!groups[ch.group]) groups[ch.group]=[]; groups[ch.group].push(ch); });
+
+  const container=document.getElementById("channel-container");
+  container.innerHTML="";
+  Object.keys(groups).forEach(group=>{
+    const groupDiv=document.createElement("div"); groupDiv.className="channel-group"; groupDiv.innerHTML=`<h2>${group}</h2>`;
+    const listDiv=document.createElement("div"); listDiv.className="channel-list";
+    groups[group].forEach(ch=>{ listDiv.appendChild(createChannelItem(ch)); });
+    groupDiv.appendChild(listDiv); container.appendChild(groupDiv);
+  });
+}
+
+function createChannelItem(ch){
+  const item=document.createElement("div"); item.className="channel";
+  const favBtn=document.createElement("button"); favBtn.className="fav-btn"; favBtn.innerText="★";
+  favBtn.onclick=(e)=>{ e.stopPropagation(); toggleFavourite(ch, favBtn); };
+  item.onclick=()=> playWithAd(ch, item);
+  item.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/100'}" alt="${ch.name}"><div class="channel-name">${ch.name}</div>`; item.appendChild(favBtn);
+  return item;
+}
+
+function toggleFavourite(ch,favBtn){
+  const favList=document.getElementById("favList"), favSection=document.getElementById("favourites");
+  if(favChannels.find(c=>c.url===ch.url)){
+    favChannels=favChannels.filter(c=>c.url!==ch.url); favBtn.classList.remove("active");
+    favList.querySelector(`[data-url="${ch.url}"]`)?.remove();
+  } else {
+    favChannels.push(ch); favBtn.classList.add("active"); const favItem=createChannelItem(ch); favItem.setAttribute("data-url",ch.url); favList.appendChild(favItem); favSection.style.display="block";
+  }
+  if(favChannels.length===0) favSection.style.display="none";
+}
+
+function playWithAd(channel,element){
+  lastChannelUrl=channel.url;
+  initPlayer(adUrl);
+  setTimeout(()=>{ initPlayer(lastChannelUrl); },8000); // 8s ad
+  document.querySelectorAll('.channel').forEach(el=>el.classList.remove('active-channel'));
+  element.classList.add('active-channel');
+  document.getElementById("epg").style.display="block";
+  document.getElementById("nowTitle").innerText=channel.name;
+  document.getElementById("nextTitle").innerText="Coming up soon...";
+}
+
+document.getElementById("channelSearch").addEventListener("input",function(){
+  const term=this.value.toLowerCase();
+  document.querySelectorAll(".channel").forEach(channel=>{ const name=channel.querySelector(".channel-name").innerText.toLowerCase();
+    channel.style.display=name.includes(term)?"block":"none";
+  });
+});
+
+loadChannels();
+
+// Overlay Play button
+document.getElementById("playOverlay").onclick=function(){
+  if(!isStarted){
+    isStarted=true; this.style.display="none"; // hide overlay
+    const firstChannel=document.querySelector(".channel");
+    if(firstChannel) firstChannel.click();
+  }
+};
 </script>
 </body>
-        </html>
+</html>
