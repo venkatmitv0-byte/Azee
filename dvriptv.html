@@ -13,46 +13,39 @@
     .search { flex: 1; text-align: right; }
     .search input { padding: 8px 12px; border-radius: 20px; border: none; font-size: 14px; outline: none; max-width: 200px; }
     .video-wrapper { position: sticky; top: 0; z-index: 999; background-color: #0a0a0a; }
-    .video-container { max-width: 900px; margin: auto; padding: 10px; text-align: center; position: relative; }
+    .video-container { max-width: 900px; margin: auto; padding: 10px; }
     video { width: 100%; height: auto; border-radius: 10px; }
     #epg { margin-top: 15px; color: #fff; font-size: 14px; background: #1a1a1a; padding: 10px; border-radius: 8px; display: none; }
     h2 { margin-left: 20px; color: #ff6666; font-size: 20px; border-left: 10px solid #cc0000; padding-left: 10px; }
     .channel-group { margin-bottom: 20px; }
     .channel-list { display: flex; flex-wrap: wrap; gap: 15px; padding: 1px 10px; }
-    .channel { width: 100px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; }
+    .channel { width: 80px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; position: relative; }
     .channel:hover, .channel.active-channel { transform: scale(1.08); box-shadow: 0 0 10px #ff0000; border: 2px solid #ffffff; }
     .channel img { width: 100%; border-radius: 15px; border: 1px solid #ffffff; }
     .channel-name { margin-top: 6px; font-size: 14px; }
-    footer { text-align: center; padding: 20px; color: #bfbfbf; font-size: 14px; }
+    .fav-btn { position: absolute; top: 5px; right: 5px; font-size: 18px; color: gold; cursor: pointer; text-shadow: 0 0 3px black; }
+    .fav-btn.inactive { color: gray; }
 
-    /* ⭐ Favourite floating icon */
-    #favIcon {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(204,0,0,0.9);
+    /* Ad overlay */
+    #adOverlay {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
       color: white;
-      border: none;
-      font-size: 20px;
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: background 0.3s, transform 0.2s;
     }
-    #favIcon:hover { background: #ff3333; transform: scale(1.1); }
+    #adImage {
+      max-width: 90%; max-height: 80vh; border-radius: 10px;
+    }
+    #skipAd {
+      margin-top: 15px;
+      background: #ff0000; color: #fff; padding: 8px 12px; border: none;
+      border-radius: 5px; cursor: pointer; font-size: 14px;
+    }
 
-    @media (max-width: 600px) {
-      header { font-size: 20px; padding: 15px; }
-      h2 { font-size: 18px; margin-left: 10px; padding-left: 8px; }
-      .channel { width: 80px; }
-      .channel-name { font-size: 11px; }
-      .video-container { padding: 5px; }
-      footer { font-size: 12px; padding: 15px; }
-    }
+    footer { text-align: center; padding: 20px; color: #bfbfbf; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -78,12 +71,17 @@
         }
       }'>
     </video>
-    <button id="favIcon">❤️</button>
     <div id="epg">
       <strong>Now Playing:</strong> <span id="nowTitle">Loading...</span><br>
       <strong>Next:</strong> <span id="nextTitle">Loading...</span>
     </div>
   </div>
+</div>
+
+<!-- Ad overlay -->
+<div id="adOverlay">
+  <img id="adImage" src="https://iili.io/KIuaqWN.png" alt="Ad">
+  <button id="skipAd">Skip (5)</button>
 </div>
 
 <div id="channel-container"></div>
@@ -94,22 +92,29 @@
 
 <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
 <script>
-document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%6C%61%79%65%72%20%3D%20%76%69%64%65%6F%6A%73%28%27%74%61%74%61%70%6C%61%79%65%72%27%29%3B%0A%20%20%63%6F%6E%73%74%20%6D%33%75%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B%0A%20%20%6C%65%74%20%61%6C%6C%43%68%61%6E%6E%65%6C%73%20%3D%20%5B%5D%3B%0A%20%20%6C%65%74%20%63%75%72%72%65%6E%74%43%68%61%6E%6E%65%6C%20%3D%20%6E%75%6C%6C%3B%0A'));
+document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%6C%61%79%65%72%20%3D%20%76%69%64%65%6F%6A%73%28%27%74%61%74%61%70%6C%61%79%65%72%27%29%3B%0A%20%20%63%6F%6E%73%74%20%6D%33%75%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B%0A'));
 </script>
 
+  let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+  let pendingChannel = null;
+  let adTimer = null;
+  let countdown = 5;
 
   async function loadChannels() {
     const res = await fetch(m3uUrl);
     const text = await res.text();
-    const lines = text.split("\n");
 
+    const lines = text.split("\n");
+    let channels = [];
     let current = {};
+
     lines.forEach(line => {
       line = line.trim();
       if (line.startsWith("#EXTINF")) {
         const nameMatch = line.match(/,(.*)$/);
         const logoMatch = line.match(/tvg-logo="(.*?)"/);
         const groupMatch = line.match(/group-title="(.*?)"/);
+
         current = {
           name: nameMatch ? nameMatch[1].trim() : "Unknown",
           logo: logoMatch ? logoMatch[1] : "",
@@ -117,49 +122,51 @@ document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%
         };
       } else if (line && !line.startsWith("#")) {
         current.url = line;
-        allChannels.push(current);
+        channels.push(current);
         current = {};
       }
     });
 
-    renderChannels();
-  }
-
-  function renderChannels() {
-    const container = document.getElementById("channel-container");
-    container.innerHTML = "";
-
-    // ⭐ Favourites first
-    const favs = getFavourites();
-    if (favs.length > 0) {
-      const favDiv = document.createElement("div");
-      favDiv.className = "channel-group";
-      favDiv.innerHTML = `<h2>⭐ Favourites</h2>`;
-      const favList = document.createElement("div");
-      favList.className = "channel-list";
-      favs.forEach(ch => {
-        favList.appendChild(createChannelItem(ch));
-      });
-      favDiv.appendChild(favList);
-      container.appendChild(favDiv);
-    }
-
-    // Other groups
-    const groups = {};
-    allChannels.forEach(ch => {
+    const groups = { "⭐ Favorites": [] };
+    channels.forEach(ch => {
+      if (favs.some(f => f.url === ch.url)) groups["⭐ Favorites"].push(ch);
       if (!groups[ch.group]) groups[ch.group] = [];
       groups[ch.group].push(ch);
     });
 
+    const container = document.getElementById("channel-container");
+    container.innerHTML = "";
+
     Object.keys(groups).forEach(group => {
+      if (!groups[group].length) return;
       const groupDiv = document.createElement("div");
       groupDiv.className = "channel-group";
       groupDiv.innerHTML = `<h2>${group}</h2>`;
+
       const listDiv = document.createElement("div");
       listDiv.className = "channel-list";
+
       groups[group].forEach(ch => {
-        listDiv.appendChild(createChannelItem(ch));
+        const item = document.createElement("div");
+        item.className = "channel";
+
+        const isFav = favs.some(f => f.url === ch.url);
+        item.innerHTML = `
+          <span class="fav-btn ${isFav ? '' : 'inactive'}" title="Toggle Favorite">★</span>
+          <img src="${ch.logo || "https://via.placeholder.com/100"}" alt="${ch.name}">
+          <div class="channel-name">${ch.name}</div>
+        `;
+
+        item.querySelector(".fav-btn").onclick = (e) => {
+          e.stopPropagation();
+          toggleFavorite(ch, item.querySelector(".fav-btn"));
+        };
+
+        item.onclick = () => showAdFirst(ch, item);
+
+        listDiv.appendChild(item);
       });
+
       groupDiv.appendChild(listDiv);
       container.appendChild(groupDiv);
     });
@@ -167,67 +174,69 @@ document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%
     document.querySelector(".channel")?.click();
   }
 
-  function createChannelItem(ch) {
-    const item = document.createElement("div");
-    item.className = "channel";
-    item.innerHTML = `
-      <img src="${ch.logo || "https://via.placeholder.com/100"}" alt="${ch.name}">
-      <div class="channel-name">${ch.name}</div>
-    `;
-    item.onclick = () => changeChannel(ch, item);
-    return item;
+  function toggleFavorite(ch, btn) {
+    const exists = favs.some(f => f.url === ch.url);
+    if (exists) {
+      favs = favs.filter(f => f.url !== ch.url);
+      btn.classList.add("inactive");
+    } else {
+      favs.push(ch);
+      btn.classList.remove("inactive");
+    }
+    localStorage.setItem("favorites", JSON.stringify(favs));
+    loadChannels();
   }
 
-  function changeChannel(ch, element) {
-    currentChannel = ch;
+  function showAdFirst(ch, element) {
+    pendingChannel = { ch, element };
+    document.getElementById("adOverlay").style.display = "flex";
+    countdown = 5;
+    document.getElementById("skipAd").innerText = "Skip (" + countdown + ")";
+    adTimer = setInterval(() => {
+      countdown--;
+      document.getElementById("skipAd").innerText = "Skip (" + countdown + ")";
+      if (countdown <= 0) {
+        clearInterval(adTimer);
+        playChannelAfterAd();
+      }
+    }, 1000);
+  }
+
+  function playChannelAfterAd() {
+    clearInterval(adTimer);
+    if (!pendingChannel) return;
+    const { ch, element } = pendingChannel;
+    document.getElementById("adOverlay").style.display = "none";
+    changeChannel(ch.url, element);
+    pendingChannel = null;
+  }
+
+  document.getElementById("skipAd").onclick = playChannelAfterAd;
+
+  function changeChannel(url, element) {
     player.pause();
     player.reset();
-    player.src({ src: ch.url, type: 'application/x-mpegURL' });
+    player.src({ src: url, type: 'application/x-mpegURL' });
     player.play();
+
+    player.one('loadedmetadata', () => {
+      const tracks = player.audioTracks();
+      if (tracks && tracks.length) {
+        for (let i = 0; i < tracks.length; i++) {
+          const lang = (tracks[i].language || "").toLowerCase();
+          tracks[i].enabled = (lang === "te" || lang === "tel" || lang === "telugu");
+        }
+      }
+    });
 
     document.querySelectorAll('.channel').forEach(el => el.classList.remove('active-channel'));
     element.classList.add('active-channel');
 
     document.getElementById("epg").style.display = "block";
-    document.getElementById("nowTitle").innerText = ch.name;
+    document.getElementById("nowTitle").innerText = element.querySelector(".channel-name").innerText;
     document.getElementById("nextTitle").innerText = "Coming up soon...";
-
-    updateFavButton();
   }
 
-  // ⭐ Favourites handling
-  function getFavourites() {
-    return JSON.parse(localStorage.getItem("favourites") || "[]");
-  }
-
-  function saveFavourites(favs) {
-    localStorage.setItem("favourites", JSON.stringify(favs));
-  }
-
-  function toggleFavourite() {
-    if (!currentChannel) return;
-    let favs = getFavourites();
-    const exists = favs.find(ch => ch.url === currentChannel.url);
-    if (exists) {
-      favs = favs.filter(ch => ch.url !== currentChannel.url);
-    } else {
-      favs.push(currentChannel);
-    }
-    saveFavourites(favs);
-    renderChannels();
-    updateFavButton();
-  }
-
-  function updateFavButton() {
-    if (!currentChannel) return;
-    const favs = getFavourites();
-    const isFav = favs.some(ch => ch.url === currentChannel.url);
-    document.getElementById("favIcon").innerText = isFav ? "💔" : "❤️";
-  }
-
-  document.getElementById("favIcon").addEventListener("click", toggleFavourite);
-
-  // search
   document.getElementById("channelSearch").addEventListener("input", function () {
     const term = this.value.toLowerCase();
     document.querySelectorAll(".channel").forEach(channel => {
@@ -239,4 +248,4 @@ document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%20%20%63%6F%6E%73%74%20%70%
   loadChannels();
 </script>
 </body>
-</html>
+        </html>
