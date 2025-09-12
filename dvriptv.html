@@ -66,16 +66,22 @@
 
 <footer>© 2025 DVR iPTV — FOR EDUCATIONAL PURPOSES ONLY</footer>
 
+<!-- PlayerJS -->
 <script src="https://venkatmitv0-byte.github.io/Azee/playerjs.js"></script>
+
 <script>
-document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%6C%65%74%20%70%6C%61%79%65%72%3B%0A%63%6F%6E%73%74%20%61%64%55%72%6C%3D%22%68%74%74%70%73%3A%2F%2F%76%65%6E%6B%61%74%6D%69%74%76%30%2D%62%79%74%65%2E%67%69%74%68%75%62%2E%69%6F%2F%41%7A%65%65%2F%56%69%76%61%43%75%74%5F%76%69%64%65%6F%5F%31%37%35%37%35%37%38%33%36%30%33%34%39%5F%31%30%38%30%48%44%2E%6D%70%34%22%3B%0A%63%6F%6E%73%74%20%6D%33%75%55%72%6C%3D%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B'));
+document.write(unescape('%3C%73%63%72%69%70%74%3E%0A%6C%65%74%20%70%6C%61%79%65%72%3B%0A%6C%65%74%20%61%64%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%76%65%6E%6B%61%74%6D%69%74%76%30%2D%62%79%74%65%2E%67%69%74%68%75%62%2E%69%6F%2F%41%7A%65%65%2F%56%69%76%61%43%75%74%5F%76%69%64%65%6F%5F%31%37%35%37%35%37%38%33%36%30%33%34%39%5F%31%30%38%30%48%44%2E%6D%70%34%22%3B%20%2F%2F%20%73%61%6D%70%6C%65%20%61%64%0A%6C%65%74%20%6D%33%75%55%72%6C%20%3D%20%22%68%74%74%70%73%3A%2F%2F%64%76%72%69%70%74%76%68%65%6C%70%73%2E%67%69%74%68%75%62%2E%69%6F%2F%4D%33%55%2F%6A%69%6F%70%6C%75%73%24%24%2E%6D%33%75%22%3B%20%2F%2F%20%73%61%6D%70%6C%65%20%6D%33%75%20%70%6C%61%79%6C%69%73%74%0A'));
 </script>
 
+
 let lastChannelUrl="";
-let favChannels=[];
+let favChannels=JSON.parse(localStorage.getItem("favChannels")||"[]"); 
 let isStarted=false;
 
-function initPlayer(url){ if(player) player.api("destroy"); player=new Playerjs({id:"player", file:url, autoplay:true, mute:false}); }
+function initPlayer(url){ 
+  if(player) player.api("destroy"); 
+  player=new Playerjs({id:"player", file:url, autoplay:true, mute:false}); 
+}
 
 async function loadChannels(){
   const res = await fetch(m3uUrl);
@@ -98,9 +104,17 @@ async function loadChannels(){
   Object.keys(groups).forEach(group=>{
     const groupDiv=document.createElement("div"); groupDiv.className="channel-group"; groupDiv.innerHTML=`<h2>${group}</h2>`;
     const listDiv=document.createElement("div"); listDiv.className="channel-list";
-    groups[group].forEach(ch=>{ listDiv.appendChild(createChannelItem(ch)); });
+    groups[group].forEach(ch=>{
+      const item=createChannelItem(ch);
+      if(favChannels.find(c=>c.url===ch.url)){
+        item.querySelector(".fav-btn").classList.add("active");
+      }
+      listDiv.appendChild(item);
+    });
     groupDiv.appendChild(listDiv); container.appendChild(groupDiv);
   });
+
+  renderFavourites();
 }
 
 function createChannelItem(ch){
@@ -108,25 +122,45 @@ function createChannelItem(ch){
   const favBtn=document.createElement("button"); favBtn.className="fav-btn"; favBtn.innerText="★";
   favBtn.onclick=(e)=>{ e.stopPropagation(); toggleFavourite(ch, favBtn); };
   item.onclick=()=> playWithAd(ch, item);
-  item.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/100'}" alt="${ch.name}"><div class="channel-name">${ch.name}</div>`; item.appendChild(favBtn);
+  item.innerHTML=`<img src="${ch.logo||'https://via.placeholder.com/100'}" alt="${ch.name}"><div class="channel-name">${ch.name}</div>`;
+  item.appendChild(favBtn);
   return item;
 }
 
 function toggleFavourite(ch,favBtn){
   const favList=document.getElementById("favList"), favSection=document.getElementById("favourites");
   if(favChannels.find(c=>c.url===ch.url)){
-    favChannels=favChannels.filter(c=>c.url!==ch.url); favBtn.classList.remove("active");
+    favChannels=favChannels.filter(c=>c.url!==ch.url); 
+    favBtn.classList.remove("active");
     favList.querySelector(`[data-url="${ch.url}"]`)?.remove();
   } else {
-    favChannels.push(ch); favBtn.classList.add("active"); const favItem=createChannelItem(ch); favItem.setAttribute("data-url",ch.url); favList.appendChild(favItem); favSection.style.display="block";
+    favChannels.push(ch); 
+    favBtn.classList.add("active"); 
+    const favItem=createChannelItem(ch); 
+    favItem.setAttribute("data-url",ch.url); 
+    favList.appendChild(favItem); 
+    favSection.style.display="block";
   }
   if(favChannels.length===0) favSection.style.display="none";
+  localStorage.setItem("favChannels", JSON.stringify(favChannels));
+}
+
+function renderFavourites(){
+  const favList=document.getElementById("favList"), favSection=document.getElementById("favourites");
+  favList.innerHTML="";
+  favChannels.forEach(ch=>{
+    const favItem=createChannelItem(ch); 
+    favItem.setAttribute("data-url",ch.url); 
+    favItem.querySelector(".fav-btn").classList.add("active");
+    favList.appendChild(favItem);
+  });
+  favSection.style.display=favChannels.length>0?"block":"none";
 }
 
 function playWithAd(channel,element){
   lastChannelUrl=channel.url;
   initPlayer(adUrl);
-  setTimeout(()=>{ initPlayer(lastChannelUrl); },8000); // 8s ad
+  setTimeout(()=>{ initPlayer(lastChannelUrl); },8000); 
   document.querySelectorAll('.channel').forEach(el=>el.classList.remove('active-channel'));
   element.classList.add('active-channel');
   document.getElementById("epg").style.display="block";
@@ -136,17 +170,17 @@ function playWithAd(channel,element){
 
 document.getElementById("channelSearch").addEventListener("input",function(){
   const term=this.value.toLowerCase();
-  document.querySelectorAll(".channel").forEach(channel=>{ const name=channel.querySelector(".channel-name").innerText.toLowerCase();
+  document.querySelectorAll(".channel").forEach(channel=>{
+    const name=channel.querySelector(".channel-name").innerText.toLowerCase();
     channel.style.display=name.includes(term)?"block":"none";
   });
 });
 
 loadChannels();
 
-// Overlay Play button
 document.getElementById("playOverlay").onclick=function(){
   if(!isStarted){
-    isStarted=true; this.style.display="none"; // hide overlay
+    isStarted=true; this.style.display="none"; 
     const firstChannel=document.querySelector(".channel");
     if(firstChannel) firstChannel.click();
   }
