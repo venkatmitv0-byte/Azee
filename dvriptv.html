@@ -70,7 +70,134 @@
 <script src="https://venkatmitv0-byte.github.io/Azee/playerjs.js"></script>
 
 <script>
-https://dvriptvhelps.github.io/M3U/jioplus$$star.m3u
+  <script>
+  const m3uUrl = "https://dvriptvhelps.github.io/M3U/jioplus$$star.m3u";
+  const player = videojs("tataplayer", {
+    controls: true,
+    autoplay: true,
+    preload: "auto",
+    fluid: true,
+    controlBar: {
+      fullscreenToggle: true
+    }
+  });
+
+  async function loadChannels() {
+    const res = await fetch(m3uUrl);
+    const text = await res.text();
+
+    const lines = text.split("\n");
+    let channels = [];
+    let current = {};
+
+    lines.forEach(line => {
+      line = line.trim();
+      if (line.startsWith("#EXTINF")) {
+        const nameMatch = line.match(/,(.*)$/);
+        const logoMatch = line.match(/tvg-logo="(.*?)"/);
+        const groupMatch = line.match(/group-title="(.*?)"/);
+
+        current = {
+          name: nameMatch ? nameMatch[1].trim() : "Unknown",
+          logo: logoMatch ? logoMatch[1] : "",
+          group: groupMatch ? groupMatch[1] : "Others"
+        };
+      } else if (line && !line.startsWith("#")) {
+        current.url = line;
+        channels.push(current);
+        current = {};
+      }
+    });
+
+    const groups = {};
+    channels.forEach(ch => {
+      if (!groups[ch.group]) groups[ch.group] = [];
+      groups[ch.group].push(ch);
+    });
+
+    const container = document.getElementById("channel-container");
+    container.innerHTML = "";
+
+    Object.keys(groups).forEach(group => {
+      const groupDiv = document.createElement("div");
+      groupDiv.className = "channel-group";
+      groupDiv.innerHTML = `<h2>${group}</h2>`;
+
+      const listDiv = document.createElement("div");
+      listDiv.className = "channel-list";
+
+      groups[group].forEach(ch => {
+        const item = document.createElement("div");
+        item.className = "channel";
+        item.onclick = () => openPlayer(ch.url, ch.name);
+
+        item.innerHTML = `
+          <img src="${ch.logo || "https://via.placeholder.com/100"}" alt="${ch.name}">
+          <div class="channel-name">${ch.name}</div>
+        `;
+        listDiv.appendChild(item);
+      });
+
+      groupDiv.appendChild(listDiv);
+      container.appendChild(groupDiv);
+    });
+  }
+
+  function openPlayer(url, name) {
+    document.getElementById("playerPage").style.display = "block";
+    document.getElementById("channelTitle").innerText = "▶ " + name;
+
+    player.pause();
+    player.reset();
+    player.src({ src: url, type: "application/x-mpegURL" });
+    player.play();
+
+    // Telugu default audio
+    player.one('loadedmetadata', () => {
+      const tracks = player.audioTracks();
+      if (tracks && tracks.length) {
+        let foundTelugu = false;
+        for (let i = 0; i < tracks.length; i++) {
+          const lang = (tracks[i].language || "").toLowerCase();
+          if (lang.includes("te") || lang.includes("tel")) {
+            tracks[i].enabled = true;
+            foundTelugu = true;
+          } else {
+            tracks[i].enabled = false;
+          }
+        }
+        if (!foundTelugu) {
+          tracks[0].enabled = true;
+        }
+      }
+    });
+  }
+
+  document.getElementById("closeBtn").onclick = () => {
+    document.getElementById("playerPage").style.display = "none";
+    player.pause();
+  };
+
+  // ✅ Full mobile screen, but header hides automatically
+  document.getElementById("fullscreenBtn").onclick = () => {
+    const page = document.getElementById("playerPage");
+    if (!document.fullscreenElement) {
+      page.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  document.getElementById("channelSearch").addEventListener("input", function () {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll(".channel").forEach(channel => {
+      const name = channel.querySelector(".channel-name").innerText.toLowerCase();
+      channel.style.display = name.includes(term) ? "block" : "none";
+    });
+  });
+
+  loadChannels();
+
 </script>
   
 <script>
