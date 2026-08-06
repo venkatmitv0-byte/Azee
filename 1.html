@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DVR Premium Media Hub</title>
+
+<!-- Font Awesome & Google Fonts for Netflix Font Style -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg-color: #141414;
+    --card-bg: #181818;
+    --text-color: #fff;
+    --netflix-red: #E50914;
+    --border-color: #2f2f2f;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    /* Hide scrollbar during intro animation */
+    overflow-y: hidden; 
+}
+
+/* ===================================================
+   NETFLIX INTRO ANIMATION
+   =================================================== */
+.netflix-intro {
+    position: fixed;
+    inset: 0;
+    background-color: #000;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeOutIntro 0.6s ease-in-out forwards;
+    animation-delay: 3.2s;
+}
+
+.intro-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 8rem;
+    color: transparent;
+    letter-spacing: 4px;
+    background: linear-gradient(to right, #e50914, #b81d24, #e50914);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0px 4px 20px rgba(229, 9, 20, 0.4);
+    opacity: 0;
+    transform: scale(0.5);
+    animation: netflixZoomEffect 3s cubic-bezier(0.215, 0.610, 0.355, 1) forwards;
+}
+
+@keyframes netflixZoomEffect {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+        filter: blur(10px);
+    }
+    15% {
+        opacity: 1;
+        filter: blur(0px);
+    }
+    45% {
+        transform: scale(1.1);
+    }
+    75% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(3.5);
+        opacity: 0;
+        filter: blur(5px);
+    }
+}
+
+@keyframes fadeOutIntro {
+    to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+}
+
+/* Main content reveal animation after intro */
+.main-wrapper {
+    opacity: 0;
+    animation: revealContent 0.8s ease-out forwards;
+    animation-delay: 3.4s;
+}
+
+@keyframes revealContent {
+    to { opacity: 1; }
+}
+
+
+/* ===================================================
+   MAIN WEBSITES STYLES (Netflix UI)
+   =================================================== */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 4%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    transition: background 0.5s ease;
+}
+
+.brand-logo {
+    color: var(--netflix-red);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: 2px;
+    text-decoration: none;
+    display: inline-block;
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         2px 2px 5px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+    transform: scale(1.05);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-icon {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #fff;
+    transition: color 0.3s;
+}
+
+.nav-icon:hover {
+    color: #b3b3b3;
+}
+
+.search-box-container {
+    display: none;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 6px 12px;
+    border: 1px solid #fff;
+}
+
+.search-box-container.active {
+    display: flex;
+    animation: expandSearch 0.4s ease forwards;
+}
+
+@keyframes expandSearch {
+    from { width: 0; opacity: 0; }
+    to { width: 220px; opacity: 1; }
+}
+
+.search-box-container input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    margin-left: 8px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+/* HERO BANNER (AUTO SWITCH POSTERS) */
+.hero-banner {
+    height: 80vh;
+    background-size: cover;
+    background-position: center top; /* టాప్ ఫోకస్ కోసం */
+    display: flex;
+    align-items: center;
+    padding: 0 4%;
+    position: relative;
+    /* ఇమేజ్ సాఫ్ట్‌గా మారడానికి ట్రాన్సిషన్ */
+    transition: background-image 0.8s ease-in-out; 
+}
+
+/* బ్యానర్ కింద డార్క్ షాడో ఎఫెక్ట్ */
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(20,20,20,0.1) 0%, rgba(20,20,20,0.6) 50%, #141414 100%);
+    z-index: 1;
+}
+
+/* CONTENT CONTAINER */
+.main-container {
+    padding: 0 4% 40px 4%;
+    margin-top: -60px;
+    position: relative;
+    z-index: 10;
+}
+
+.section-title {
+    margin: 40px 0 15px;
+    font-size: 1.5rem;
+    color: #e5e5e5;
+    font-weight: 700;
+    display: inline-block;
+}
+
+/* NETFLIX CARD HOVER SLIDER EFFECT */
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.media-card {
+    background: var(--card-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+}
+
+.media-card:hover {
+    transform: scale(1.08);
+    z-index: 50;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.8);
+}
+
+.media-card img {
+    width: 100%;
+    height: 145px;
+    object-fit: cover;
+    transition: opacity 0.3s;
+}
+
+.card-info {
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #181818;
+}
+
+.card-info h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.play-btn-circle {
+    background: #fff;
+    color: #000;
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.media-card:hover .play-btn-circle {
+    background: var(--netflix-red);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+/* THEATER OVERLAY */
+.player-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 5000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.player-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.video-container-box {
+    width: 85%;
+    max-width: 1050px;
+    aspect-ratio: 16/9;
+    background: #000;
+    box-shadow: 0 0 40px rgba(229, 9, 20, 0.4);
+}
+
+.video-container-box iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.close-btn {
+    color: #fff;
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.close-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    color: var(--netflix-red);
+}
+
+/* ABOUT & FOOTER */
+.about-box {
+    margin-top: 60px;
+    background: #181818;
+    padding: 30px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.about-box h3 {
+    color: var(--netflix-red);
+    font-size: 1.3rem;
+}
+
+footer {
+    text-align: center;
+    padding: 40px;
+    color: #808080;
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 50px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 1. NETFLIX INTRO ANIMATION SCREEN -->
+<div class="netflix-intro">
+    <div class="intro-logo">DVR</div>
+</div>
+
+<!-- 2. MAIN WEBSITE WRAPPER -->
+<div class="main-wrapper">
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="mainNavbar">
+        <a href="#" class="brand-logo">DVR</a>
+
+        <div class="nav-right">
+            <i class="fa-solid fa-magnifying-glass nav-icon" onclick="toggleSearchElement()"></i>
+            <div class="search-box-container" id="searchWrapper">
+                <input type="text" placeholder="Titles, channels..." onkeyup="searchFilterEngine(this.value)">
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO BANNER (ONLY POSTER BACKGROUND) -->
+    <div class="hero-banner" id="heroBanner"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+
+        <!-- MOVIES SECTION -->
+        <h2 class="section-title">Movies websites</h2>
+        <div class="media-grid search-target">
+            
+            <div class="media-card" data-title="MOVIERULZ" onclick="window.open('https://www.5movierulz.forsale/', '_blank')">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPeMT8qnP6gKyaX_-Gq1oP4xrqOev8JxMueZIY_n64qw4coDMlRG7ygfA&s=10">
+                <div class="card-info">
+                    <h4>MOVIERULZ</h4>
+                    <i class="fa-solid fa-play play-btn-circle"></i>
+                </div>
+            </div>
+
+            <div class="media-card" data-title="TELUGU PRAJALU" onclick="window.open('https://teluguprazalu.com/telugu-latest-movies/', '_blank')">
+                <img src="https://teluguprazalu.com/wp-content/uploads/2017/05/logo-final2.gif">
+                <div class="card-info">
+                    <h4>TELUGU PRAJALU</h4>
+                    <i class="fa-solid fa-play play-btn-circle"></i>
+                </div>
+            </div>
+            
+            <div class="media-card" data-title="FROZEN 2" onclick="window.open('https://streamimdb.ru/embed/movie/tt4520988/', '_blank')">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEihxzO7yHH1MT5J2SLfZae9d7jrWAHE76pKMS71SyaynHae_cDnNjXTgRLUGOpY_I7ZYKrlErdd_HSu8jeI5k2aNjeb2QB65CQCO-VERBCr3ovyCusbiozJo258aAYXFTThns1Ci7iqSBbd/s1600/960x0.jpg">
+                <div class="card-info">
+                    <h4>FROZEN 2</h4>
+                    <i class="fa-solid fa-play play-btn-circle"></i>
+                </div>
+            </div>
+            
+            <div class="media-card" data-title="FROZEN 2" onclick="window.open('https://minochinos.com/file/9crlzdgb4s4o/', '_blank')">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEihxzO7yHH1MT5J2SLfZae9d7jrWAHE76pKMS71SyaynHae_cDnNjXTgRLUGOpY_I7ZYKrlErdd_HSu8jeI5k2aNjeb2QB65CQCO-VERBCr3ovyCusbiozJo258aAYXFTThns1Ci7iqSBbd/s1600/960x0.jpg">
+                <div class="card-info">
+                    <h4>FROZEN 2</h4>
+                    <i class="fa-solid fa-play play-btn-circle"></i>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- IPTV SECTION -->
+        <h2 class="section-title">Live IPTV Channels</h2>
+        <div class="media-grid search-target">
+
+            <div class="media-card" data-title="Live News" data-ytid="j2S89tA6vG0" onclick="bootPremiumPlayer(this)">
+                <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=400&q=80">
+                <div class="card-info">
+                    <h4>Live Global News</h4>
+                    <i class="fa-solid fa-tower-broadcast play-btn-circle"></i>
+                </div>
+            </div>
+
+            <div class="media-card" data-title="NASA" data-ytid="P9C25UnGxaM" onclick="bootPremiumPlayer(this)">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=400&q=80">
+                <div class="card-info">
+                    <h4>NASA Live Stream</h4>
+                    <i class="fa-solid fa-tower-broadcast play-btn-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- WEBSITES SECTION -->
+        <h2 class="section-title">Movie Websites</h2>
+        <div class="media-grid">
+
+            <div class="media-card" onclick="window.open('https://www.netflix.com','_blank')">
+                <img src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=400&q=80">
+                <div class="card-info">
+                    <h4>Netflix</h4>
+                </div>
+            </div>
+
+            <div class="media-card" onclick="window.open('https://www.primevideo.com','_blank')">
+                <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=400&q=80">
+                <div class="card-info">
+                    <h4>Prime Video</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABOUT PROJECT -->
+        <div class="about-box">
+            <h3><i class="fa-solid fa-graduation-cap"></i> About Project</h3>
+            <br>
+            <p>ఇది Educational Purpose కోసం తయారు చేసిన DVR Media Hub Demo Project.</p>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        © 2026 DVR Media Hub • All rights reserved •
+    </footer>
+
+</div>
+
+<!-- VIDEO PLAYER OVERLAY -->
+<div class="player-overlay" id="theaterScreen">
+    <div class="close-btn" onclick="killPremiumPlayer()">
+        <i class="fa-solid fa-xmark"></i>
+    </div>
+    <div class="video-container-box">
+        <iframe id="embeddedCorePlayer" src="" allowfullscreen allow="autoplay"></iframe>
+    </div>
+</div>
+
+<script>
+// ===================================================
+// AUTOMATIC MOVIE POSTER BANNER CONFIGURATION
+// ===================================================
+// ఇక్కడ కింద ఉన్న సింగిల్ కోట్స్ ' ' మధ్యలో మీ మూవీ పోస్టర్ ఇమేజ్ లింక్స్ పెట్టుకోండి.
+// మీకు నచ్చినన్ని లింకులు కామా ( , ) ఇస్తూ యాడ్ చేసుకోవచ్చు.
+const posterLinks = [
+    "https://m.media-amazon.com/images/M/MV5BNWFlNWM2Y2YtY2VhOC00MWFiLWExNWYtYWViYzJhMDQyMTJiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1200&q=80"
+];
+
+let currentPosterIndex = 0;
+
+function switchHeroPoster() {
+    const banner = document.getElementById('heroBanner');
+    
+    if (posterLinks.length > 0) {
+        const nextPoster = posterLinks[currentPosterIndex];
+        // బ్యాక్‌గ్రౌండ్‌ లో ఇమేజ్ మార్చడం
+        banner.style.backgroundImage = `url('${nextPoster}')`;
+        // ఇండెక్స్ అప్‌డేట్
+        currentPosterIndex = (currentPosterIndex + 1) % posterLinks.length;
+    }
+}
+
+// మొదటి సారి పేజీ ఓపెన్ అయినప్పుడు పోస్టర్ లోడ్ అవ్వడానికి
+switchHeroPoster();
+
+// ప్రతి 4 సెకన్లకు (4000 మిల్లీసెకన్లు) ఒకసారి ఆటోమేటిక్‌గా మారుతుంది. టైమ్ మార్చాలంటే 4000 మార్చుకోండి.
+setInterval(switchHeroPoster, 4000);
+
+
+// ===================================================
+// OTHER CORE UTILITIES
+// ===================================================
+
+// Enable page scroll only after Netflix intro animation completes
+setTimeout(() => {
+    document.body.style.overflowY = 'auto';
+}, 3500);
+
+// Navbar dynamic color shift on scroll
+window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('mainNavbar');
+    if (window.scrollY > 30) {
+        navbar.style.background = '#141414';
+    } else {
+        navbar.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)';
+    }
+});
+
+function toggleSearchElement(){
+    document.getElementById('searchWrapper').classList.toggle('active');
+}
+
+function searchFilterEngine(keyword){
+    const query = keyword.toLowerCase();
+    const cards = document.querySelectorAll('.search-target .media-card');
+
+    cards.forEach(card => {
+        const title = card.getAttribute('data-title') || '';
+        if(title.toLowerCase().includes(query)){
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function bootPremiumPlayer(card){
+    const videoID = card.getAttribute('data-ytid');
+    if(videoID){
+        document.getElementById('embeddedCorePlayer').src = `https://www.youtube.com/embed/${videoID}?autoplay=1`;
+        const player = document.getElementById('theaterScreen');
+        player.style.display = 'flex';
+        setTimeout(() => player.classList.add('active'), 10);
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function killPremiumPlayer(){
+    const player = document.getElementById('theaterScreen');
+    player.classList.remove('active');
+    setTimeout(() => {
+        player.style.display = 'none';
+        document.getElementById('embeddedCorePlayer').src = "";
+    }, 400);
+    document.body.style.overflow = 'auto';
+}
+</script>
+
+</body>
+</html>
