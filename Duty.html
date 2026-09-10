@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Shift Roster Management</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 0px 20px;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      color: #00d2ff;
+      margin-bottom: 8px;
+    }
+
+    .clock-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 18px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      max-width: 1100px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .current-card {
+      border: 2px solid #00e676;
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      color: #bbb;
+    }
+
+    .current-card h2 {
+      color: #00e676;
+    }
+
+    .profile-img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 12px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .current-card .profile-img {
+      border-color: #00e676;
+    }
+
+    .operator-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .mobile-no {
+      font-size: 1rem;
+      color: #00d2ff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .mobile-no a {
+      color: #00d2ff;
+      text-decoration: none;
+      background: rgba(0, 210, 255, 0.15);
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .shift-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .shift-a { background: #ff9800; }
+    .shift-b { background: #2196f3; }
+    .shift-c { background: #9c27b0; }
+
+    .shift-time {
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+
+    /* Professional Footer Styles */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.9rem;
+      color: #aaa;
+      letter-spacing: 0.5px;
+      margin-top: auto;
+    }
+
+    footer span {
+      color: #00d2ff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-content">
+    <div class="header">
+      <h1>DUTY SHIFTS</h1>
+      <div class="clock-box" id="live-clock">Loading...</div>
+    </div>
+
+    <div class="container">
+      <!-- 1. Current Shift Operator -->
+      <div class="card current-card">
+        <h2>1. Current Duty</h2>
+        <img id="current-img" class="profile-img" src="" alt="Operator Image">
+        <div id="current-name" class="operator-name">-</div>
+        <div id="current-mobile" class="mobile-no">-</div>
+        <div id="current-badge" class="shift-badge">-</div>
+        <div id="current-time" class="shift-time">-</div>
+      </div>
+
+      <!-- 2. Next Shift Operator -->
+      <div class="card">
+        <h2>2. Next Shift Duty</h2>
+        <img id="next-img" class="profile-img" src="" alt="Operator Image">
+        <div id="next-name" class="operator-name">-</div>
+        <div id="next-mobile" class="mobile-no">-</div>
+        <div id="next-badge" class="shift-badge">-</div>
+        <div id="next-time" class="shift-time">-</div>
+      </div>
+
+      <!-- 3. Third Shift Operator -->
+      <div class="card">
+        <h2>3. 3rd Shift Duty</h2>
+        <img id="third-img" class="profile-img" src="" alt="Operator Image">
+        <div id="third-name" class="operator-name">-</div>
+        <div id="third-mobile" class="mobile-no">-</div>
+        <div id="third-badge" class="shift-badge">-</div>
+        <div id="third-time" class="shift-time">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Section -->
+  <footer>
+    &copy; <span id="year"></span> All Rights Reserved | Designed by <span>Venkat</span>
+  </footer>
+
+  <script>
+    // Set Current Year in Footer
+    document.getElementById('year').innerText = new Date().getFullYear();
+
+    // 1. OPERATORS DETAILS
+    const operatorsList = {
+      'OP1': {
+        name: 'Venkata Ramana',
+        mobile: '8499893001',
+        img: 'https://raw.githubusercontent.com/venkatmitv0-byte/Azee/main/file_0000000088ec822f96e158d4757b438b.png'
+      },
+      'OP2': {
+        name: 'Gangadhar',
+        mobile: '9966036709',
+        img: 'https://pbs.twimg.com/profile_images/580988220675993600/zvgKbOrE_400x400.png'
+      },
+      'OP3': {
+        name: 'Durga Prasad',
+        mobile: '9966935363',
+        img: 'https://preview.redd.it/tell-me-the-best-epsiode-and-best-doraemon-movie-v0-nmdyic3mnpfg1.jpeg?width=640&crop=smart&auto=webp&s=b4da053c05e6187b626d4ee66786bb7e6ef52992'
+      }
+    };
+
+    // 2. WEEKLY ROSTER 
+    const weeklyRoster = {
+      1: { A: 'OP2', B: 'OP1', C: 'OP3' }, // Monday
+      2: { A: 'OP2', B: 'OP1', C: 'OP3' }, // Tuesday
+      3: { A: 'OP3', B: 'OP2', C: 'OP1' }, // Wednesday
+      4: { A: 'OP3', B: 'OP2', C: 'OP1' }, // Thursday
+      5: { A: 'OP1', B: 'OP3', C: 'OP2' }, // Friday
+      6: { A: 'OP1', B: 'OP3', C: 'OP2' }, // Saturday
+      0: { A: 'OP2', B: 'OP1', C: 'OP3' }  // Sunday
+    };
+
+    const shiftTimings = {
+      'A': '6:00 AM - 2:00 PM',
+      'B': '2:00 PM - 10:00 PM',
+      'C': '10:00 PM - 6:00 AM'
+    };
+
+    function updateShiftDisplay() {
+      const now = new Date();
+      
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayName = days[now.getDay()];
+      document.getElementById('live-clock').innerText = `${dayName} | ${now.toLocaleTimeString()}`;
+
+      const hours = now.getHours();
+      let currentShift = '', nextShift = '', thirdShift = '';
+      let currentDayIndex = now.getDay();
+      let nextShiftDayIndex = currentDayIndex;
+      let thirdShiftDayIndex = currentDayIndex;
+
+      if (hours >= 6 && hours < 14) {
+        currentShift = 'A';
+        nextShift = 'B';
+        thirdShift = 'C';
+      } else if (hours >= 14 && hours < 22) {
+        currentShift = 'B';
+        nextShift = 'C';
+        thirdShift = 'A';
+        thirdShiftDayIndex = (currentDayIndex + 1) % 7;
+      } else {
+        currentShift = 'C';
+        nextShift = 'A';
+        thirdShift = 'B';
+        if (hours >= 22) {
+          nextShiftDayIndex = (currentDayIndex + 1) % 7;
+          thirdShiftDayIndex = (currentDayIndex + 1) % 7;
+        } else {
+          thirdShiftDayIndex = currentDayIndex; 
+        }
+      }
+
+      let rosterDayIndex = currentDayIndex;
+      if (hours < 6) {
+        rosterDayIndex = (currentDayIndex - 1 + 7) % 7;
+        nextShiftDayIndex = currentDayIndex;
+      }
+
+      const currentOp = operatorsList[weeklyRoster[rosterDayIndex][currentShift]];
+      const nextOp = operatorsList[weeklyRoster[nextShiftDayIndex][nextShift]];
+      const thirdOp = operatorsList[weeklyRoster[thirdShiftDayIndex][thirdShift]];
+
+      function setCardData(type, op, shift) {
+        document.getElementById(`${type}-img`).src = op.img;
+        document.getElementById(`${type}-name`).innerText = op.name;
+        document.getElementById(`${type}-mobile`).innerHTML = `<a href="tel:${op.mobile}">📞 ${op.mobile}</a>`;
+        document.getElementById(`${type}-badge`).innerText = `Shift ${shift}`;
+        document.getElementById(`${type}-badge`).className = `shift-badge shift-${shift.toLowerCase()}`;
+        document.getElementById(`${type}-time`).innerText = shiftTimings[shift];
+      }
+
+      setCardData('current', currentOp, currentShift);
+      setCardData('next', nextOp, nextShift);
+      setCardData('third', thirdOp, thirdShift);
+    }
+
+    setInterval(updateShiftDisplay, 1000);
+    updateShiftDisplay();
+  </script>
+</body>
+</html>
